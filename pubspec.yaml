@@ -53,6 +53,7 @@ dependencies:
   auto_size_text_field: ^1.0.1
   share_plus: ^4.0.10
   flutter_slidable: ^1.3.2
+  modal_bottom_sheet: ^2.0.1
 
 dev_dependencies:
   flutter_test:

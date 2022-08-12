@@ -8,12 +8,15 @@ import 'package:direct_chat/tabs/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get/get.dart';
 import 'package:rate_my_app/rate_my_app.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-PageController pageController = PageController();
+import 'model/multi_language_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+PageController pageController = PageController();
 
 final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -42,9 +45,7 @@ final lightTheme = ThemeData(
 
 var themeData = isLightTheme ? lightTheme : darkTheme;
 void main() async {
-  WidgetsBinding widgetsBinding =
-       WidgetsFlutterBinding.ensureInitialized();
-
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   var payLoad = "";
   var details =
       await FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails();
@@ -55,16 +56,23 @@ void main() async {
     }
   }
   WidgetsFlutterBinding.ensureInitialized();
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(MyApp(payLoad: payLoad));
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   String? payLoad;
 
   MyApp({this.payLoad});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   RateMyApp _rateMyApp = RateMyApp(
     preferencesPrefix: "rateMyApp_",
     minDays: 3,
@@ -74,15 +82,38 @@ class MyApp extends StatelessWidget {
     googlePlayIdentifier: "com.sunraylabs.socialtags",
     // appStoreIdentifier: ‘1491556149’,
   );
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getLanguageCode();
+  }
+
+  _getLanguageCode() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    if (preferences.getString("language") != null) {
+      var language = preferences.getString("language");
+      var languageCode = preferences.getString("languageCode");
+      setState(() {
+        var selectionValue = language.toString();
+        Get.updateLocale(Locale(languageCode!));
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      translations: MultiLanguageModel(),
+      // showPerformanceOverlay: true,
+      locale: Locale('en', 'US'),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(rateMyApp: _rateMyApp, payLoad: payLoad),
+      home: MyHomePage(rateMyApp: _rateMyApp, payLoad: widget.payLoad),
     );
   }
 }
@@ -104,6 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
     pageController = PageController(initialPage: _bottomNavIndex);
     if (widget.payLoad == null || widget.payLoad == "") {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -111,15 +143,14 @@ class _MyHomePageState extends State<MyHomePage> {
           // if (widget.rateMyApp!.shouldOpenDialog) {
           widget.rateMyApp!.showStarRateDialog(
             context,
-            title: "Rate this app",
+            title: "Rate this app".tr,
             // The dialog title.
-            message:
-                "You like this app ? Then take a little bit of your time to leave a rating :", // The dialog message.
+            message: "Rating Content".tr, // The dialog message.
             // contentBuilder: (context, defaultContent) => content, // This one allows you to change the default dialog content.
             actionsBuilder: (context, stars) {
-             return [
+              return [
                 TextButton(
-                  child: Text("OK"),
+                  child: Text("Ok".tr),
                   onPressed: () async {
                     print("Thanks for the " +
                         (stars == null ? "0" : stars.round().toString()) +
@@ -207,7 +238,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // }
   }
 
-
   androidDialog(value1) async {
     var value = value1;
     showDialog(
@@ -288,12 +318,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final autoSizeGroup = AutoSizeGroup();
 
-  // void _onPageChanged(int index) {
-  //   setState(() {
-  //     _bottomNavIndex = index;
-  //   });
-  // }
-
   var _bottomNavIndex = 0;
   @override
   Widget build(BuildContext context) {
@@ -301,7 +325,7 @@ class _MyHomePageState extends State<MyHomePage> {
       resizeToAvoidBottomInset: false,
       backgroundColor: themeData.backgroundColor,
       body: PageView(
-        onPageChanged: (i){
+        onPageChanged: (i) {
           setState(() => _bottomNavIndex = i);
         },
         controller: pageController,
@@ -314,33 +338,58 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: ClipRRect(
         borderRadius: BorderRadius.only(
-            topRight: Radius.circular(15), topLeft: Radius.circular(15)),
+            topRight: Radius.circular(30), topLeft: Radius.circular(30)),
         child: Container(
             color: themeData.cardColor,
             child: SalomonBottomBar(
               currentIndex: _bottomNavIndex,
-              onTap: (i) {setState(() => _bottomNavIndex = i);pageController.jumpToPage(_bottomNavIndex);},
+              onTap: (i) {
+                setState(() => _bottomNavIndex = i);
+                pageController.jumpToPage(_bottomNavIndex);
+              },
               items: [
                 SalomonBottomBarItem(
-                  icon: Icon(
-                    Icons.keyboard_alt_outlined,
+                  unselectedColor: themeData.dividerColor,
+                  icon: Icon(Icons.keyboard_alt_outlined),
+                  title: Container(
+                    width: Get.width * 0.2,
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown, child: Text("Keyboard".tr)),
                   ),
-                  title: Text("Keyboard"),
                   selectedColor: Colors.green,
                 ),
                 SalomonBottomBarItem(
+                  unselectedColor: themeData.dividerColor,
                   icon: Icon(Icons.history),
-                  title: Text("Recent"),
+                  title: Container(
+                    width: Get.width * 0.2,
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown, child: Text("Recent".tr)),
+                  ),
                   selectedColor: Colors.green,
                 ),
                 SalomonBottomBarItem(
+                  unselectedColor: themeData.dividerColor,
                   icon: Icon(Icons.calendar_month_outlined),
-                  title: Text("Schedule"),
+                  title: Container(
+                    width: Get.width * 0.2,
+                    child: FittedBox(
+                        fit: BoxFit.scaleDown, child: Text("Schedule".tr)),
+                  ),
                   selectedColor: Colors.green,
                 ),
                 SalomonBottomBarItem(
-                  icon: Icon(Icons.settings_outlined),
-                  title: Text("Setting"),
+                  unselectedColor: themeData.dividerColor,
+                  icon: Icon(
+                    Icons.settings_outlined,
+                  ),
+                  title: Container(
+                    width: Get.width * 0.2,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text("Setting".tr),
+                    ),
+                  ),
                   selectedColor: Colors.green,
                 ),
               ],

@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../model/history_model.dart';
 
@@ -39,30 +40,34 @@ class _RecentScreenState extends State<RecentScreen> {
 
   buildDeleteDialogueIos(i) {
     return showCupertinoDialog(
-        context: context,
-        builder: (context) {
-          return CupertinoAlertDialog(
-            title: const Text('Delete !'),
-            content: const Text("Are You Sure ?"),
-            actions: [
-              TextButton(
-                  onPressed: () async {
-                    deleteData(historyData![i].id);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Yes',
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontFamily: 'SFProDisplay'))),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('No')),
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text('Delete!'.tr),
+          content: Text("Sure Delete".tr),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                deleteData(historyData![i].id);
+                Navigator.pop(context);
+              },
+              child: Text(
+                'Yes'.tr,
+                style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
+                    fontFamily: 'SFProDisplay'),
+              ),
+            ),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('No'.tr)),
+          ],
+        );
+      },
+    );
   }
 
   buildDeleteDialogueAndroid(i) {
@@ -70,15 +75,15 @@ class _RecentScreenState extends State<RecentScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Delete !'),
-            content: const Text("Are You Sure ?"),
+            title: Text('Delete!'.tr),
+            content: Text("Sure Delete".tr),
             actions: [
               TextButton(
                   onPressed: () async {
                     deleteData(historyData![i].id);
                     Navigator.pop(context);
                   },
-                  child: const Text('Yes',
+                  child: Text('Yes'.tr,
                       style: TextStyle(
                           color: Colors.red,
                           fontSize: 16,
@@ -87,7 +92,7 @@ class _RecentScreenState extends State<RecentScreen> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Text('No')),
+                  child: Text('No'.tr)),
             ],
           );
         });
@@ -99,6 +104,42 @@ class _RecentScreenState extends State<RecentScreen> {
     // DateTime.parse(formattedString)
   }
 
+  Future<void> _launchUrl(number, isWhatsapp, countryCode, message) async {
+    var temp = countryCode;
+    // IOS API
+    // "https://api.whatsapp.com/send?phone=9712151416&text=HELLO"
+    var url;
+    if (isWhatsapp) {
+      url =
+          "https://api.whatsapp.com/send?phone=${number.toString().contains("+") ? "" : temp.replaceAll("+", "")}$number&text=${message == null ? "" : message}";
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch ${url}';
+      }
+    } else {
+      final Uri smsLaunchUri = Uri(
+        scheme: 'sms',
+        path: '$number',
+        queryParameters: <String, String>{
+          'body': Uri.encodeComponent('${message == null ? "" : message}'),
+        },
+      );
+      if (await canLaunchUrl(smsLaunchUri)) {
+        await launchUrl(smsLaunchUri);
+      } else {
+        throw 'Could not launch ${smsLaunchUri}';
+      }
+    }
+
+    print("URL : $url");
+    //
+
+    // if (!await launchUrl(Uri.parse("https://api.whatsapp.com"))) {
+    //   throw 'Could not launch $url';+615
+    // }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +148,7 @@ class _RecentScreenState extends State<RecentScreen> {
           elevation: 0,
           centerTitle: true,
           title: Text(
-            "Recent",
+            "Recent".tr,
             style: TextStyle(
                 color: themeData.dividerColor, fontWeight: FontWeight.bold),
           ),
@@ -124,17 +165,20 @@ class _RecentScreenState extends State<RecentScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset("assets/images/noData.png",width: Get.width,),
+                            Image.asset(
+                              "assets/images/noData.png",
+                              width: Get.width,
+                            ),
                             Text(
-                              "No Data",
+                              "No Recent".tr,
                               style: TextStyle(color: themeData.dividerColor),
                             ),
                             TextButton(
                                 onPressed: () {
                                   pageController.jumpToPage(0);
                                 },
-                                child: const Text(
-                                  "Add data",
+                                child: Text(
+                                  "Add Recent".tr,
                                   style: TextStyle(color: Colors.green),
                                 ))
                           ],
@@ -166,93 +210,115 @@ class _RecentScreenState extends State<RecentScreen> {
                                     )
                                   ],
                                 ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: themeData.cardColor,
-                                      borderRadius: BorderRadius.circular(15)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 8, left: 8),
-                                    child: ListTile(
-                                      contentPadding: EdgeInsets.zero,
-                                      leading:
-                                          historyData![i].type == "whatsapp"
-                                              ? Image.asset(
-                                                  "assets/images/whatsapp.png",
-                                                  height: 40,
-                                                  width: 40,
-                                                )
-                                              : Image.asset(
-                                                  "assets/images/textMessage.png",
-                                                  height: 40,
-                                                  width: 40,
-                                                ),
-                                      title: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            width: historyData![i].name! == "null" ? 0.001 : Get.width * 0.25,
-                                            child: Text(
-                                              historyData![i].name! == "null"
-                                                  ? ""
-                                                  : historyData![i].name!,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  color: themeData.dividerColor,
-                                                  fontSize: 15),
-                                            ),
-                                          ),
-                                          Expanded(
-
-                                            child: Text(
-                                              historyData![i].name! == "null" ? "${historyData![i].countryCode!} ${historyData![i].phoneNumber!}" : " (${historyData![i].countryCode!} ${historyData![i].phoneNumber!})",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  color: themeData.dividerColor
-                                                      .withOpacity(0.5),
-                                                  fontSize: 14),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      subtitle: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              historyData![i].message! == "null"
-                                                  ? "No message"
-                                                  : historyData![i].message!,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                  color: themeData.dividerColor
-                                                      .withOpacity(0.5),
-                                                  fontSize: 14),
-                                            ),
-                                          ),
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.watch_later_outlined,
-                                                color: themeData.dividerColor
-                                                    .withOpacity(0.5),
-                                                size: 12,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    _launchUrl(
+                                        historyData![i].phoneNumber,
+                                        historyData![i].type == "whatsapp"
+                                            ? true
+                                            : false,
+                                        historyData![i].countryCode,
+                                        historyData![i].message == "null" ? "" :  historyData![i].message);
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: themeData.cardColor,
+                                        borderRadius:
+                                            BorderRadius.circular(15)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 8, left: 8),
+                                      child: ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        leading:
+                                            historyData![i].type == "whatsapp"
+                                                ? Image.asset(
+                                                    "assets/images/whatsapp.png",
+                                                    height: 40,
+                                                    width: 40,
+                                                  )
+                                                : Image.asset(
+                                                    "assets/images/textMessage.png",
+                                                    height: 40,
+                                                    width: 40,
+                                                  ),
+                                        title: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                  minWidth: 0.001,
+                                                  maxWidth: Get.width * 0.25),
+                                              child: Text(
+                                                historyData![i].name! == "null"
+                                                    ? ""
+                                                    : historyData![i].name!,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color:
+                                                        themeData.dividerColor,
+                                                    fontSize: 15),
                                               ),
-                                              const SizedBox(
-                                                width: 5,
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                historyData![i].name! == "null"
+                                                    ? "${historyData![i].countryCode!} ${historyData![i].phoneNumber!}"
+                                                    : " (${historyData![i].countryCode!} ${historyData![i].phoneNumber!})",
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    color: historyData![i]
+                                                                .name! !=
+                                                            "null"
+                                                        ? themeData.dividerColor
+                                                            .withOpacity(0.5)
+                                                        : themeData
+                                                            .dividerColor,
+                                                    fontSize: 14),
                                               ),
-                                              Text(
-                                                timeAgo(DateTime.parse(
-                                                    historyData![i]
-                                                        .createdDate!)),
+                                            )
+                                          ],
+                                        ),
+                                        subtitle: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                historyData![i].message! ==
+                                                        "null"
+                                                    ? "No Message".tr
+                                                    : historyData![i].message!,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                     color: themeData
                                                         .dividerColor
                                                         .withOpacity(0.5),
-                                                    fontSize: 12),
+                                                    fontSize: 14),
                                               ),
-                                            ],
-                                          )
-                                        ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.watch_later_outlined,
+                                                  color: themeData.dividerColor
+                                                      .withOpacity(0.5),
+                                                  size: 12,
+                                                ),
+                                                const SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text(timeAgo(DateTime.parse(
+                                                      historyData![i]
+                                                          .createdDate!)),
+                                                  style: TextStyle(
+                                                      color: themeData
+                                                          .dividerColor
+                                                          .withOpacity(0.5),
+                                                      fontSize: 12),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

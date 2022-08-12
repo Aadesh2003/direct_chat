@@ -22,7 +22,8 @@ class KeyboardScreen extends StatefulWidget {
   State<KeyboardScreen> createState() => _KeyboardScreenState();
 }
 
-class _KeyboardScreenState extends State<KeyboardScreen> {
+class _KeyboardScreenState extends State<KeyboardScreen>
+    with WidgetsBindingObserver {
   var _value = "";
 
   NumberButtonView(value) {
@@ -48,7 +49,15 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
         PhoneNumber phoneNumber = await PhoneNumberUtil().parse(result.text!);
         numberController.text = phoneNumber.nationalNumber;
         countryCodeController.text = "+${phoneNumber.countryCode} ▾";
-        Get.snackbar("Successfully copy", "");
+        _value = numberController.text;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Successfully paste"),
+          backgroundColor: Colors.grey.withOpacity(0.3),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          duration: Duration(milliseconds: 500
+          ),
+        ));
+        // Get.snackbar(, "",
+        //     snackPosition: SnackPosition.BOTTOM);
       } catch (e) {
         print(e);
       }
@@ -74,17 +83,13 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
   List<Widget> _getDialerButtons() {
     var rows = <Widget>[];
     var items = <Widget>[];
-
     for (var i = 0; i < mainTitle.length; i++) {
       if (i % 3 == 0 && i > 0) {
         rows.add(Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: items));
-        rows.add(SizedBox(
-          height: 12,
-        ));
+        rows.add(SizedBox(height: 12,));
         items = <Widget>[];
       }
-
       if (mainTitle[i] == "*" || mainTitle[i] == "＃") {
         items.add(GestureDetector(
           onTap: () async {
@@ -104,7 +109,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
             setState(() {});
           },
           onLongPress: () async {
-            await Future.delayed(Duration(microseconds: 800));
+            await Future.delayed(Duration(microseconds: 1200));
             setState(() {
               _value = "";
               numberController.text = "";
@@ -189,14 +194,30 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
     // }
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        getClipBoardData();
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        break;
+    }
+  }
+
   var name;
   var message;
   var mainTitle = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "＃"];
   TextEditingController numberController = TextEditingController();
   TextEditingController nameController = TextEditingController();
-  TextEditingController
-
-  countryCodeController =
+  TextEditingController countryCodeController =
       TextEditingController(text: "+91 ▾");
   TextEditingController messageController = TextEditingController();
   FocusNode nameFocusNode = FocusNode();
@@ -207,19 +228,21 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text(value == "name" ? "Enter Name" : "Enter Message"),
+            title: Text(value == "name" ? "Enter Name".tr : "Enter Message".tr),
             content: TextField(
               onChanged: (value) {},
               controller: value == "name" ? nameController : messageController,
               focusNode: value == "name" ? nameFocusNode : messageFocusNode,
-              decoration: InputDecoration(hintText: "Text Field in Dialog"),
+              decoration: InputDecoration(
+                  hintText:
+                      value == "name" ? "Enter Name".tr : "Enter Message".tr),
             ),
             actions: [
               MaterialButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text("Cancel"),
+                child: Text("Cancel".tr),
               ),
               MaterialButton(
                 onPressed: () {
@@ -236,7 +259,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                   }
                   Navigator.pop(context);
                 },
-                child: Text("Ok"),
+                child: Text("Ok".tr),
               )
             ],
           );
@@ -253,6 +276,7 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance?.addObserver(this);
     getClipBoardData();
   }
 
@@ -264,7 +288,8 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
       setState(() {
         var _selectedCountry = country;
         // print(_selectedCountry);
-        countryCodeController.text = "${_selectedCountry.callingCode.toString()} ▾";
+        countryCodeController.text =
+            "${_selectedCountry.callingCode.toString()} ▾";
       });
     }
   }
@@ -338,14 +363,23 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextButton(
-                      onPressed: () async {
-                        nameFocusNode.requestFocus();
-                        await buildNameOrMessageDialogue("name");
-                        nameFocusNode.unfocus();
-                        setState(() {});
-                      },
-                      child: Text(name == null ? "Add Name" : name)),
+                  Expanded(
+                    child: TextButton(
+                        onPressed: () async {
+                          nameFocusNode.requestFocus();
+                          await buildNameOrMessageDialogue("name");
+                          nameFocusNode.unfocus();
+                          setState(() {});
+                        },
+                        child: Text(
+                          name == null ? "Add Name".tr : name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: name == null
+                                  ? Colors.blue
+                                  : themeData.dividerColor.withOpacity(0.5)),
+                        )),
+                  ),
                   Padding(
                     padding: EdgeInsets.only(right: 10, left: 10),
                     child: Container(
@@ -354,16 +388,22 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                       height: 17,
                     ),
                   ),
-                  TextButton(
-                      onPressed: () async {
-                        messageFocusNode.requestFocus();
-                        await buildNameOrMessageDialogue("message");
-                        messageFocusNode.unfocus();
-                      },
-                      child: Text(
-                        message == null ? "Add Message" : message,
-                        overflow: TextOverflow.ellipsis,
-                      ))
+                  Expanded(
+                    child: TextButton(
+                        onPressed: () async {
+                          messageFocusNode.requestFocus();
+                          await buildNameOrMessageDialogue("message");
+                          messageFocusNode.unfocus();
+                        },
+                        child: Text(
+                            message == null ? "Add Message".tr : message,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                color: message == null
+                                    ? Colors.blue
+                                    : themeData.dividerColor
+                                        .withOpacity(0.5)))),
+                  )
                 ],
               ),
               ..._getDialerButtons(),
@@ -380,7 +420,8 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                           message: message,
                           phoneNumber: numberController.text,
                           createdDate: DateTime.now().toString(),
-                          countryCode: countryCodeController.text.replaceAll(" ▾", ""),
+                          countryCode:
+                              countryCodeController.text.replaceAll(" ▾", ""),
                           type: "textMessage",
                         );
                         await storeData(model);
@@ -405,7 +446,8 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                           phoneNumber: numberController.text,
                           type: "whatsapp",
                           createdDate: DateTime.now().toString(),
-                          countryCode: countryCodeController.text.replaceAll(" ▾", ""),
+                          countryCode:
+                              countryCodeController.text.replaceAll(" ▾", ""),
                         );
                         await storeData(model);
                         _launchUrl(numberController.text, true);
@@ -423,7 +465,8 @@ class _KeyboardScreenState extends State<KeyboardScreen> {
                       print("=-=-=-");
                       if (numberController.text.isNotEmpty) {
                         print("=-=-=-");
-                        var temp = countryCodeController.text.replaceAll(" ▾", "");
+                        var temp =
+                            countryCodeController.text.replaceAll(" ▾", "");
                         var link =
                             "https://api.whatsapp.com/send?phone=${numberController.text.toString().contains("+") ? "" : temp.replaceAll("+", "")}${numberController.text}&text=${message == null ? "" : message}";
                         print(link);
