@@ -4,13 +4,13 @@ import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:country_calling_code_picker/functions.dart';
 import 'package:direct_chat/helper/db_helper.dart';
 import 'package:direct_chat/model/history_model.dart';
+import 'package:direct_chat/tabs/recent_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dialpad/flutter_dialpad.dart';
 import 'package:get/get.dart';
 import 'package:phone_number/phone_number.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
@@ -23,7 +23,7 @@ class KeyboardScreen extends StatefulWidget {
 }
 
 class _KeyboardScreenState extends State<KeyboardScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver,AutomaticKeepAliveClientMixin{
   var _value = "";
 
   NumberButtonView(value) {
@@ -50,11 +50,12 @@ class _KeyboardScreenState extends State<KeyboardScreen>
         numberController.text = phoneNumber.nationalNumber;
         countryCodeController.text = "+${phoneNumber.countryCode} ▾";
         _value = numberController.text;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Successfully paste"),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Successfully paste"),
           backgroundColor: Colors.grey.withOpacity(0.3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          duration: Duration(milliseconds: 500
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          duration: Duration(milliseconds: 500),
         ));
         // Get.snackbar(, "",
         //     snackPosition: SnackPosition.BOTTOM);
@@ -87,7 +88,9 @@ class _KeyboardScreenState extends State<KeyboardScreen>
       if (i % 3 == 0 && i > 0) {
         rows.add(Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: items));
-        rows.add(SizedBox(height: 12,));
+        rows.add(SizedBox(
+          height: 12,
+        ));
         items = <Widget>[];
       }
       if (mainTitle[i] == "*" || mainTitle[i] == "＃") {
@@ -95,8 +98,12 @@ class _KeyboardScreenState extends State<KeyboardScreen>
           onTap: () async {
             if (mainTitle[i] == "*") {
               var result = await Clipboard.getData("text/plain");
+              var onlyDigit = RegExp(r'^[0-9]+$').hasMatch(result!.text!);
               print(result);
-              numberController.text = result!.text!;
+              if (onlyDigit) {
+                numberController.text = result.text!;
+                _value = result.text!;
+              }
             }
             if (mainTitle[i] == "＃") {
               _value.isEmpty
@@ -110,10 +117,12 @@ class _KeyboardScreenState extends State<KeyboardScreen>
           },
           onLongPress: () async {
             await Future.delayed(Duration(microseconds: 1200));
-            setState(() {
-              _value = "";
-              numberController.text = "";
-            });
+            if (mainTitle[i] == "＃") {
+              setState(() {
+                _value = "";
+                numberController.text = "";
+              });
+            }
           },
           onLongPressStart: (e) {
             eraseCheck = true;
@@ -129,7 +138,7 @@ class _KeyboardScreenState extends State<KeyboardScreen>
             print("=-=-OnLongPressEnd");
           },
           child: DialButton(
-            icon: mainTitle[i] == "*" ? Icons.copy : Icons.backspace_outlined,
+            icon: mainTitle[i] == "*" ? Icons.paste : Icons.backspace_outlined,
             iconColor: themeData.dividerColor,
             textColor: themeData.dividerColor,
           ),
@@ -138,9 +147,9 @@ class _KeyboardScreenState extends State<KeyboardScreen>
         items.add(GestureDetector(
           onTap: () {
             print(mainTitle[i]);
-            print(_value);
             _value += mainTitle[i];
             numberController.text = _value;
+            print(numberController.text);
           },
           child: DialButton(
             title: mainTitle[i],
@@ -276,7 +285,7 @@ class _KeyboardScreenState extends State<KeyboardScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     getClipBoardData();
   }
 
@@ -296,6 +305,7 @@ class _KeyboardScreenState extends State<KeyboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     var screenSize = MediaQuery.of(context).size;
     var sizeFactor = screenSize.height * 0.09852217;
     return Scaffold(
@@ -309,16 +319,12 @@ class _KeyboardScreenState extends State<KeyboardScreen>
             child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
               Row(
                 children: [
-                  Container(
-                      decoration: BoxDecoration(
-                          // color: themeData.cardColor,
-                          borderRadius: BorderRadius.circular(15)),
-                      // height: 50,
-                      width: Get.width * 0.35,
-                      // alignment: Alignment.center,
-                      child: Padding(
+                  Wrap(
+                    children: [
+                      Padding(
                         padding: EdgeInsets.zero,
                         child: AutoSizeTextField(
+                          fullwidth: false,
                           onTap: _showCountryPicker,
                           readOnly: true,
                           controller: countryCodeController,
@@ -342,10 +348,13 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                           // TextInputType.phone,
                           // validator: ,
                         ),
-                      )),
+                      ),
+                    ],
+                  ),
                   Expanded(
                     child: AutoSizeTextField(
                       // minFontSize: sizeFactor / 3,
+                      fullwidth: false,
                       minFontSize: 25,
                       readOnly: true,
                       style: TextStyle(
@@ -376,15 +385,15 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                               color: name == null
-                                  ? Colors.blue
-                                  : themeData.dividerColor.withOpacity(0.5)),
+                                  ? Colors.green
+                                  : themeData.dividerColor),
                         )),
                   ),
                   Padding(
                     padding: EdgeInsets.only(right: 10, left: 10),
                     child: Container(
                       width: 1.5,
-                      color: Colors.blue,
+                      color: Colors.green,
                       height: 17,
                     ),
                   ),
@@ -400,9 +409,8 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                                 color: message == null
-                                    ? Colors.blue
-                                    : themeData.dividerColor
-                                        .withOpacity(0.5)))),
+                                    ? Colors.green
+                                    : themeData.dividerColor))),
                   )
                 ],
               ),
@@ -425,61 +433,98 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                           type: "textMessage",
                         );
                         await storeData(model);
-                        _launchUrl(numberController.text, false);
+                        _launchUrl(
+                            "${countryCodeController.text} ${numberController.text}",
+                            false);
                       }
                     },
-                    child: DialButton(
-                      color: Colors.green,
-                      icon: Icons.message,
-                      iconColor: Colors.white,
-                      textColor: themeData.dividerColor,
-                    ),
+                    child: ClipOval(
+                        child: Container(
+                          height: sizeFactor / 1.1,
+                          width: sizeFactor / 1.1,
+                          color: Colors.green,
+                          child: Center(
+                              child: Icon(
+                                Icons.message,
+                                size: sizeFactor / 2,
+                                color: Colors.white,
+                              )),
+                        ))
                   ),
                   GestureDetector(
-                    onTap: () async {
-                      if (numberController.text.isNotEmpty) {
-                        HistoryModel model = HistoryModel(
-                          name: nameController.text.isEmpty
-                              ? null
-                              : nameController.text,
-                          message: message,
-                          phoneNumber: numberController.text,
-                          type: "whatsapp",
-                          createdDate: DateTime.now().toString(),
-                          countryCode:
-                              countryCodeController.text.replaceAll(" ▾", ""),
-                        );
-                        await storeData(model);
-                        _launchUrl(numberController.text, true);
-                      }
-                    },
-                    child: DialButton(
-                      color: Colors.green,
-                      icon: Icons.whatsapp,
-                      iconColor: Colors.white,
-                      textColor: themeData.dividerColor,
-                    ),
-                  ),
+                      onTap: () async {
+                        if (numberController.text.isNotEmpty) {
+                          HistoryModel model = HistoryModel(
+                            name: nameController.text.isEmpty
+                                ? null
+                                : nameController.text,
+                            message: message,
+                            phoneNumber: numberController.text,
+                            type: "whatsapp",
+                            createdDate: DateTime.now().toString(),
+                            countryCode:
+                                countryCodeController.text.replaceAll(" ▾", ""),
+                          );
+                          await storeData(model);
+                          _launchUrl(
+                              "${countryCodeController.text} ${numberController.text}",
+                              true);
+                        }
+                      },
+                      child: ClipOval(
+                          child: Container(
+                        height: sizeFactor / 1.1,
+                        width: sizeFactor / 1.1,
+                        color: Colors.green,
+                        child: Center(
+                            child: Icon(
+                          Icons.whatsapp,
+                          size: sizeFactor / 2,
+                          color: Colors.white,
+                        )),
+                      ))
+
+                      // DialButton(
+                      //   color: Colors.green,
+                      //   icon: Icons.whatsapp,
+                      //   iconColor: Colors.white,
+                      //   textColor: themeData.dividerColor,
+                      // ),
+                      ),
                   GestureDetector(
-                    onTap: () {
-                      print("=-=-=-");
-                      if (numberController.text.isNotEmpty) {
-                        print("=-=-=-");
-                        var temp =
-                            countryCodeController.text.replaceAll(" ▾", "");
-                        var link =
-                            "https://api.whatsapp.com/send?phone=${numberController.text.toString().contains("+") ? "" : temp.replaceAll("+", "")}${numberController.text}&text=${message == null ? "" : message}";
-                        print(link);
-                        Share.share(link);
-                      }
-                    },
-                    child: DialButton(
-                      color: Colors.green,
-                      icon: Icons.share,
-                      iconColor: Colors.white,
-                      textColor: themeData.dividerColor,
-                    ),
-                  )
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => RecentScreen()));
+                        // print("=-=-=-");
+                        // if (numberController.text.isNotEmpty) {
+                        //   print("=-=-=-");
+                        //   var temp =
+                        //       countryCodeController.text.replaceAll(" ▾", "");
+                        //   var link =
+                        //       "https://api.whatsapp.com/send?phone=${numberController.text.toString().contains("+") ? "" : temp.replaceAll("+", "")}${numberController.text}&text=${message == null ? "" : message}";
+                        //   print(link);
+                        //   Share.share(link);
+                        // }
+                      },
+                      child: ClipOval(
+                          child: Container(
+                        height: sizeFactor / 1.1,
+                        width: sizeFactor / 1.1,
+                        color: Colors.green,
+                        child: Center(
+                            child: Icon(
+                          Icons.history,
+                          size: sizeFactor / 2,
+                          color: Colors.white,
+                        )),
+                      ))
+                      // DialButton(
+                      //
+                      //   color: Colors.green,
+                      //   icon: Icons.share,
+                      //   iconColor: Colors.white,
+                      //   textColor: themeData.dividerColor,
+                      // ),
+                      )
                 ],
               ),
               SizedBox(
@@ -491,4 +536,9 @@ class _KeyboardScreenState extends State<KeyboardScreen>
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
 }

@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final notificationDataModel = notificationDataModelFromMap(jsonString);
-
 import 'dart:convert';
 
 List<NotificationDataModel> notificationDataModelFromMap(String str) => List<NotificationDataModel>.from(json.decode(str).map((x) => NotificationDataModel.fromMap(x)));

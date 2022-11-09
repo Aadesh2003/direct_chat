@@ -1,4 +1,6 @@
+// ignore_for_file: override_on_non_overriding_member, annotate_overrides, avoid_unnecessary_containers
 import 'package:direct_chat/main.dart';
+import 'package:direct_chat/preferences/language_selected_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,6 +70,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           SharedPreferences preferences = await SharedPreferences.getInstance();
           await preferences.setString("language", languageList[index]);
           await preferences.setString("languageCode", languageCodeList[index]);
+          if(!isLangselected){
+            isLangselected = true;
+            LanguageSelectedPref().addList("selected");
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(payLoad: "",)));
+          }
         },
         child: Stack(
           children: [
@@ -80,7 +87,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                       color: themeData.shadowColor.withOpacity(0.5),
                       blurRadius: 5,
                       spreadRadius: 0.5,
-                      offset: Offset(4, 4))
+                      offset: const Offset(4, 4))
                 ],
               ),
               child: Column(
@@ -112,7 +119,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 ],
               ),
             ),
-            languageList[index] == selectionValue ? Container(
+            isLangselected ? languageList[index] == selectionValue ? Container(
               // height: 30,
               // width: 30,
               // decoration: BoxDecoration(
@@ -120,10 +127,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               //     borderRadius: BorderRadius.only(topLeft: Radius.circular(15),bottomRight: Radius.circular(10))
               // ),
               child: Padding(
-                padding: EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
                 child: Icon(Icons.check_circle_outline_rounded,color: themeData.dividerColor,),
               ),
-            ) : Container(),
+            ) : Container() : Container(),
           ],
         ),
       ),
@@ -139,6 +146,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         title: Text("Choose Language".tr),
         elevation: 0,
       ),
+      // Hero(tag: 'appBar',child: Material(child: Text("Choose Language".tr,style: TextStyle(fontSize: 45),))),
+
       body: GridView.count(
         shrinkWrap: true,
         crossAxisCount: 2,

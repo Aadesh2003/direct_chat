@@ -6,7 +6,6 @@ import 'package:country_calling_code_picker/functions.dart';
 import 'package:direct_chat/main.dart';
 import 'package:direct_chat/model/notification_data_model.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -17,7 +16,6 @@ import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:timezone/data/latest.dart' as tz1;
 import 'package:timezone/timezone.dart' as tz;
-
 import '../helper/db_helper.dart';
 
 enum MessageType { whatsApp, textMessage }
@@ -29,7 +27,7 @@ class ScheduleScreen extends StatefulWidget {
   State<ScheduleScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen> {
+class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAliveClientMixin {
   TextEditingController messageController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController countryCodeController =
@@ -127,8 +125,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       day, id, time, title, isDaily) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
         int.parse(id),
-        title == null ? 'weekly scheduled notification title' : title,
-        'weekly scheduled notification body',
+        title == null ? 'monthly scheduled notification title' : title,
+        'monthly scheduled notification body',
         _nextInstanceOfMondayTenAMonthly(time),
         const NotificationDetails(
           android: AndroidNotificationDetails('weekly notification channel id',
@@ -145,8 +143,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       day, id, time, title, isOnly) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
         int.parse(id),
-        title == null ? 'weekly scheduled notification title' : title,
-        'weekly scheduled notification body',
+        title == null ? 'yearly scheduled notification title' : title,
+        'yearly scheduled notification body',
         _nextInstanceOfMondayTenAMYearly(time, isOnly),
         const NotificationDetails(
           android: AndroidNotificationDetails('weekly notification channel id',
@@ -163,8 +161,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       day, id, time, title, isDaily, payLoad) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
         int.parse(id),
-        title == null ? 'weekly scheduled notification title' : title,
-        'weekly scheduled notification body',
+        title == null ? 'daily scheduled notification title' : title,
+        'daily scheduled notification body',
         isDaily ? _nextInstanceOfDaily(time) : _nextInstanceOfMondayTenAM(time),
         const NotificationDetails(
           android: AndroidNotificationDetails('weekly notification channel id',
@@ -326,6 +324,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ));
   }
 
+
   var time = DateTime.now();
   var date = DateTime.now();
   var day;
@@ -351,6 +350,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     'Yearly'.tr
   ];
 
+  List<String> dayLst = <String>[
+    'Daily',
+    'Never',
+    'Weekly',
+    'Monthly',
+    'Yearly'
+  ];
+
   var scrollValue = 10.0;
 
   Future<void> _cancelNotification(id) async {
@@ -370,7 +377,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       nameController.text = dataModel.name!;
       date = DateTime.parse(dataModel.date!);
       // print("-=-=-=-=-");
-      selectedDay = dayList.indexWhere((element) =>
+      selectedDay = dayLst.indexWhere((element) =>
           element.toLowerCase() == dataModel.repeatDay!.toLowerCase());
       // DateTime.
       print(dataModel.time);
@@ -394,377 +401,291 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       messageController.text = "";
     }
     return showMaterialModalBottomSheet(
-      backgroundColor: themeData.backgroundColor,
+      backgroundColor: Colors.transparent,
       // isScrollControlled: true,
-      barrierColor: Colors.transparent,
+      barrierColor: Colors.black38,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(15), topRight: Radius.circular(15)),
       ),
       context: context,
-      builder: (context) => Container(
-        height: Get.height - appBar!.preferredSize.height - 50,
-        color: themeData.backgroundColor,
+      builder: (context) => SafeArea(
         child: ClipRRect(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(15), topRight: Radius.circular(15)),
-          child: Scaffold(
-            backgroundColor: themeData.cardColor,
-            appBar: AppBar(
-              elevation: 0,
-              centerTitle: true,
+          child: Container(
+            height: Get.height - appBar!.preferredSize.height - 50,
+            child: Scaffold(
               backgroundColor: themeData.cardColor,
-              leadingWidth: 100,
-              leading: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    "Cancel".tr,
-                    style: TextStyle(color: Colors.red, fontSize: 15),
-                  )),
-              actions: [
-                TextButton(
+              appBar: AppBar(
+                elevation: 0,
+                centerTitle: true,
+                backgroundColor: themeData.cardColor,
+                leadingWidth: 100,
+                leading: TextButton(
                     onPressed: () {
-                      if (_formKey.currentState != null) {
-                        if (_formKey.currentState!.validate()) {
-                          if (!isEdit) {
-                            var payLoad = [];
-                            var id =
-                                "${DateTime.now().day.toString()}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}";
-                            var title = titleController.text;
-                            var value =
-                                "$id ${dayList[selectedDay]} ${time.hour}:${time.minute} ${titleController.text} ${_site} ${countryCodeController.text}${numberController.text} ${nameController.text}";
-                            print(dayList[selectedDay]);
-                            NotificationDataModel modelValue =
-                                NotificationDataModel(
-                              createdTime: DateTime.now().toString(),
-                              title: title,
-                              type: _site.toString().contains("whatsApp")
-                                  ? "whatsApp"
-                                  : "textMessage",
-                              number: numberController.text,
-                              message: messageController.text,
-                              countryCode: countryCodeController.text,
-                              name: nameController.text,
-                              id: 5,
-                              time: "${time.hour}:${time.minute}",
-                              date: date.toString(),
-                              notificationId: id,
-                              repeatDay: dayList[selectedDay],
-                            );
-                            storeData(
-                                dayList[selectedDay],
-                                id,
-                                time,
-                                payLoad,
-                                value,
-                                title,
-                                "${countryCodeController.text}${numberController.text}",
-                                messageController.text,
-                                _site.toString().contains("whatsApp")
-                                    ? "whatsApp"
-                                    : "textMessage",
-                                modelValue);
-                            Navigator.pop(context);
-                          } else {
-                            _cancelNotification(
-                                int.parse(dataModel.notificationId.toString()));
-                            deleteData(dataModel.id);
-                            var payLoad = [];
-                            // var id = DateTime.now().toString().replaceAll(":", "").replaceAll(",", "").replaceAll(".", "").replaceAll("-", "").replaceAll(" ",  "").replaceAll(DateTime.now().year.toString(), "");
-                            var id =
-                                "${DateTime.now().day.toString()}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}";
-                            var title = titleController.text;
-                            var value =
-                                "$id ${dayList[selectedDay]} ${time.hour}:${time.minute} ${titleController.text} ${_site} ${countryCodeController.text}${numberController.text} ${nameController.text}";
-                            print(dayList[selectedDay]);
-                            NotificationDataModel modelValue =
-                                NotificationDataModel(
-                              createdTime: DateTime.now().toString(),
-                              title: title,
-                              type: _site.toString().contains("whatsApp")
-                                  ? "whatsApp"
-                                  : "textMessage",
-                              number: numberController.text,
-                              message: messageController.text,
-                              countryCode: countryCodeController.text,
-                              name: nameController.text,
-                              id: 5,
-                              time: "${time.hour}:${time.minute}",
-                              date: date.toString(),
-                              notificationId: id,
-                              repeatDay: dayList[selectedDay],
-                            );
-                            storeData(
-                                dayList[selectedDay],
-                                id,
-                                time,
-                                payLoad,
-                                value,
-                                title,
-                                "${countryCodeController.text}${numberController.text}",
-                                messageController.text,
-                                _site.toString().contains("whatsApp")
-                                    ? "whatsApp"
-                                    : "textMessage",
-                                modelValue);
-                            Navigator.pop(context);
-                          }
-                        }
-                      }
+                      Navigator.pop(context);
                     },
                     child: Text(
-                      "Done".tr,
-                      style: TextStyle(color: Colors.blue, fontSize: 15),
-                    ))
-              ],
-              title: Text("Schedule".tr,
-                  style:
-                      TextStyle(color: themeData.dividerColor, fontSize: 18)),
-            ),
-            body: StatefulBuilder(
-              builder: (context, state) {
-                return SingleChildScrollView(
+                      "Cancel".tr,
+                      style: TextStyle(color: themeData.dividerColor, fontSize: 13),
+                    )),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        if (_formKey.currentState != null) {
+                          if (_formKey.currentState!.validate()) {
+                            if (!isEdit) {
+                              var payLoad = [];
+                              var id =
+                                  "${DateTime.now().day.toString()}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}";
+                              var title = titleController.text;
+                              var value =
+                                  "$id ${dayList[selectedDay]} ${time.hour}:${time.minute} ${titleController.text} ${_site} ${countryCodeController.text}${numberController.text} ${nameController.text}";
+                              print(dayList[selectedDay]);
+                              NotificationDataModel modelValue =
+                                  NotificationDataModel(
+                                createdTime: DateTime.now().toString(),
+                                title: title,
+                                type: _site.toString().contains("whatsApp")
+                                    ? "whatsApp"
+                                    : "textMessage",
+                                number: numberController.text,
+                                message: messageController.text,
+                                countryCode: countryCodeController.text,
+                                name: nameController.text,
+                                id: 5,
+                                time: "${time.hour}:${time.minute}",
+                                date: date.toString(),
+                                notificationId: id,
+                                repeatDay: dayLst[selectedDay],
+                              );
+                              storeData(
+                                  dayLst[selectedDay],
+                                  id,
+                                  time,
+                                  payLoad,
+                                  value,
+                                  title,
+                                  "${countryCodeController.text}${numberController.text}",
+                                  messageController.text,
+                                  _site.toString().contains("whatsApp")
+                                      ? "whatsApp"
+                                      : "textMessage",
+                                  modelValue);
+                              Navigator.pop(context);
+                            } else {
+                              _cancelNotification(
+                                  int.parse(dataModel.notificationId.toString()));
+                              deleteData(dataModel.id);
+                              var payLoad = [];
+                              // var id = DateTime.now().toString().replaceAll(":", "").replaceAll(",", "").replaceAll(".", "").replaceAll("-", "").replaceAll(" ",  "").replaceAll(DateTime.now().year.toString(), "");
+                              var id =
+                                  "${DateTime.now().day.toString()}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}";
+                              var title = titleController.text;
+                              var value =
+                                  "$id ${dayList[selectedDay]} ${time.hour}:${time.minute} ${titleController.text} ${_site} ${countryCodeController.text}${numberController.text} ${nameController.text}";
+                              print(dayList[selectedDay]);
+                              NotificationDataModel modelValue =
+                                  NotificationDataModel(
+                                createdTime: DateTime.now().toString(),
+                                title: title,
+                                type: _site.toString().contains("whatsApp")
+                                    ? "whatsApp"
+                                    : "textMessage",
+                                number: numberController.text,
+                                message: messageController.text,
+                                countryCode: countryCodeController.text,
+                                name: nameController.text,
+                                id: 5,
+                                time: "${time.hour}:${time.minute}",
+                                date: date.toString(),
+                                notificationId: id,
+                                repeatDay: dayLst[selectedDay],
+                              );
+                              storeData(
+                                  dayLst[selectedDay],
+                                  id,
+                                  time,
+                                  payLoad,
+                                  value,
+                                  title,
+                                  "${countryCodeController.text}${numberController.text}",
+                                  messageController.text,
+                                  _site.toString().contains("whatsApp")
+                                      ? "whatsApp"
+                                      : "textMessage",
+                                  modelValue);
+                              Navigator.pop(context);
+                            }
+                          }
+                        }
+                      },
+                      child: Text(
+                        "Done".tr,
+                        style: TextStyle(color: themeData.dividerColor, fontSize: 13,),
+                      ))
+                ],
+                title: Text("Schedule".tr,
+                    style:
+                        TextStyle(color: themeData.dividerColor, fontSize: 20,fontWeight: FontWeight.bold)),
+              ),
+              body: StatefulBuilder(
+                builder: (context, state) {
+                  return SingleChildScrollView(
 
-                  child: Container(
-                    color: themeData.cardColor,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                right: 8, left: 8, bottom: 8, top: 10),
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    color: themeData.backgroundColor,
-                                    borderRadius: BorderRadius.circular(15)),
-                                height: 50,
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 8),
-                                  child: TextFormField(
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter title'.tr;
-                                        }
-                                        return null;
-                                      },
-                                      style: TextStyle(
-                                          color: themeData.dividerColor),
-                                      controller: titleController,
-                                      decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                          hintText: "Notification Title".tr,
-                                          hintMaxLines: 2,
-                                          hintStyle: TextStyle(
-                                              color: themeData.dividerColor
-                                                  .withOpacity(0.5)))),
-                                )),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Container(
-                                width: Get.width,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: themeData.backgroundColor),
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                        padding: EdgeInsets.all(0),
-                                        child: Container(
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                width: Get.width / 2.4,
-                                                child: ListTile(
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  minVerticalPadding: 0,
-                                                  minLeadingWidth: 0,
-                                                  horizontalTitleGap: 0,
-                                                  title: Text(
-                                                    "WhatsApp".tr,
-                                                    style: TextStyle(
-                                                        color: themeData
-                                                            .dividerColor),
-                                                  ),
-                                                  leading: Radio(
-                                                    value: MessageType.whatsApp,
-                                                    groupValue: _site,
-                                                    onChanged:
-                                                        (MessageType? value) {
-                                                      state(() {
-                                                        _site = value!;
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: Get.width / 2.4,
-                                                child: ListTile(
-                                                  horizontalTitleGap: 0,
-                                                  contentPadding:
-                                                      EdgeInsets.zero,
-                                                  minVerticalPadding: 0,
-                                                  title: Text(
-                                                    "Text Message".tr,
-                                                    style: TextStyle(
-                                                        color: themeData
-                                                            .dividerColor),
-                                                  ),
-                                                  minLeadingWidth: 0,
-                                                  leading: Radio(
-                                                    value:
-                                                        MessageType.textMessage,
-                                                    groupValue: _site,
-                                                    onChanged:
-                                                        (MessageType? value) {
-                                                      state(() {
-                                                        _site = value!;
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        )),
-                                    Padding(
-                                      padding: EdgeInsets.only(
-                                          right: 10, left: 10, top: 5),
-                                      child: Container(
-                                        color: themeData.dividerColor,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                              decoration: BoxDecoration(
-                                                  color: themeData.cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15)),
-                                              height: 50,
-                                              width: Get.width * 0.15,
-                                              alignment: Alignment.center,
-                                              child: Padding(
-                                                padding:
-                                                    EdgeInsets.only(left: 8),
-                                                child: TextFormField(
-                                                  style: TextStyle(
-                                                      color: themeData
-                                                          .dividerColor),
-                                                  onTap: _showCountryPicker,
-                                                  readOnly: true,
-                                                  controller:
-                                                      countryCodeController,
-                                                  decoration: InputDecoration(
-                                                      border: InputBorder.none,
-                                                      hintText: "+91",
-                                                      hintMaxLines: 2,
-                                                      hintStyle: TextStyle(
+                    child: Container(
+                      color: themeData.cardColor,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  right: 8, left: 8, bottom: 8, top: 10),
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      color: themeData.backgroundColor,
+                                      borderRadius: BorderRadius.circular(15)),
+                                  height: 50,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 8),
+                                    child: TextFormField(
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please enter title'.tr;
+                                          }
+                                          return null;
+                                        },
+                                        style: TextStyle(
+                                            color: themeData.dividerColor),
+                                        controller: titleController,
+                                        decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText: "Notification Title".tr,
+                                            hintMaxLines: 2,
+                                            hintStyle: TextStyle(
+                                                color: themeData.dividerColor
+                                                    .withOpacity(0.5)))),
+                                  )),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Container(
+                                  width: Get.width,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: themeData.backgroundColor),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                          padding: EdgeInsets.all(0),
+                                          child: Container(
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: Get.width / 2.4,
+                                                  child: ListTile(
+                                                    contentPadding:
+                                                        EdgeInsets.zero,
+                                                    minVerticalPadding: 0,
+                                                    minLeadingWidth: 0,
+                                                    horizontalTitleGap: 0,
+                                                    title: Text(
+                                                      "WhatsApp".tr,
+                                                      style: TextStyle(
                                                           color: themeData
-                                                              .dividerColor
-                                                              .withOpacity(
-                                                                  0.5))),
-                                                  keyboardType:
-                                                      TextInputType.phone,
-                                                  // validator: ,
+                                                              .dividerColor),
+                                                    ),
+                                                    leading: Radio(
+                                                      value: MessageType.whatsApp,
+                                                      groupValue: _site,
+                                                      onChanged:
+                                                          (MessageType? value) {
+                                                        state(() {
+                                                          _site = value!;
+                                                        });
+                                                      },
+                                                    ),
+                                                  ),
                                                 ),
-                                              )),
-                                          SizedBox(
-                                            height: 5,
-                                            width: 10,
-                                          ),
-                                          Container(
-                                              decoration: BoxDecoration(
-                                                  color: themeData.cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15)),
-                                              height: 50,
-                                              width:
-                                                  Get.width - (Get.width * 0.3),
-                                              child: Padding(
-                                                padding:
-                                                    EdgeInsets.only(left: 8),
-                                                child: TextFormField(
-                                                  validator: (value) {
-                                                    if (value == null ||
-                                                        value.isEmpty) {
-                                                      return 'Please enter number'
-                                                          .tr;
-                                                    }
-                                                    return null;
-                                                  },
-                                                  style: TextStyle(
-                                                      color: themeData
-                                                          .dividerColor),
-                                                  controller: numberController,
-                                                  decoration: InputDecoration(
-                                                      border: InputBorder.none,
-                                                      hintText: "Add Number".tr,
-                                                      hintMaxLines: 2,
-                                                      hintStyle: TextStyle(
+                                                Container(
+                                                  width: Get.width / 2.4,
+                                                  child: ListTile(
+                                                    horizontalTitleGap: 0,
+                                                    contentPadding:
+                                                        EdgeInsets.zero,
+                                                    minVerticalPadding: 0,
+                                                    title: Text(
+                                                      "Text Message".tr,
+                                                      style: TextStyle(
                                                           color: themeData
-                                                              .dividerColor
-                                                              .withOpacity(
-                                                                  0.5))),
-                                                  keyboardType:
-                                                      TextInputType.phone,
-                                                  // validator: ,
-                                                ),
-                                              )),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
+                                                              .dividerColor),
+                                                    ),
+                                                    minLeadingWidth: 0,
+                                                    leading: Radio(
+                                                      value:
+                                                          MessageType.textMessage,
+                                                      groupValue: _site,
+                                                      onChanged:
+                                                          (MessageType? value) {
+                                                        state(() {
+                                                          _site = value!;
+                                                        });
+                                                      },
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          )),
+                                      Padding(
                                         padding: EdgeInsets.only(
-                                            right: 8, left: 8, bottom: 8),
+                                            right: 10, left: 10, top: 5),
+                                        child: Container(
+                                          color: themeData.dividerColor,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.all(8),
                                         child: Row(
                                           children: [
                                             Container(
+                                                decoration: BoxDecoration(
+                                                    color: themeData.cardColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
                                                 height: 50,
                                                 width: Get.width * 0.15,
                                                 alignment: Alignment.center,
-                                                child: GestureDetector(
-                                                  onTap: () async {
-                                                    await FlutterContacts
-                                                        .requestPermission();
-                                                    final contact =
-                                                        await FlutterContacts
-                                                            .openExternalPick();
-                                                    print(contact!.name);
-                                                    print(contact.phones.first);
-                                                    nameController.text =
-                                                        contact.name.first;
-                                                    numberController.text =
-                                                        contact.phones.first
-                                                            .number;
-                                                    countryCodeController.text =
-                                                        contact.phones.first
-                                                            .normalizedNumber
-                                                            .replaceAll(
-                                                                contact
-                                                                    .phones
-                                                                    .first
-                                                                    .number,
-                                                                "");
-                                                    state(() {});
-                                                  },
-                                                  child: Icon(
-                                                    Icons
-                                                        .account_circle_rounded,
-                                                    color: Colors.blue,
-                                                    size: 40,
+                                                child: Padding(
+                                                  padding:
+                                                      EdgeInsets.only(left: 8),
+                                                  child: TextFormField(
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: themeData
+                                                            .dividerColor),
+                                                    onTap: _showCountryPicker,
+                                                    readOnly: true,
+                                                    controller:
+                                                        countryCodeController,
+                                                    decoration: InputDecoration(
+                                                        border: InputBorder.none,
+                                                        hintText: "+91",
+                                                        hintMaxLines: 2,
+                                                        hintStyle: TextStyle(
+                                                            color: themeData
+                                                                .dividerColor
+                                                                .withOpacity(
+                                                                    0.5))),
+                                                    keyboardType:
+                                                        TextInputType.phone,
+                                                    // validator: ,
                                                   ),
                                                 )),
                                             SizedBox(
@@ -778,8 +699,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                                         BorderRadius.circular(
                                                             15)),
                                                 height: 50,
-                                                width: Get.width -
-                                                    (Get.width * 0.3),
+                                                width:
+                                                    Get.width - (Get.width * 0.3),
                                                 child: Padding(
                                                   padding:
                                                       EdgeInsets.only(left: 8),
@@ -787,7 +708,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                                     validator: (value) {
                                                       if (value == null ||
                                                           value.isEmpty) {
-                                                        return 'Please enter name'
+                                                        return 'Please enter number'
                                                             .tr;
                                                       }
                                                       return null;
@@ -795,329 +716,422 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                                     style: TextStyle(
                                                         color: themeData
                                                             .dividerColor),
-                                                    controller: nameController,
+                                                    controller: numberController,
                                                     decoration: InputDecoration(
-                                                        border:
-                                                            InputBorder.none,
-                                                        hintText: "Add Name".tr,
+                                                        border: InputBorder.none,
+                                                        hintText: "Add Number".tr,
                                                         hintMaxLines: 2,
                                                         hintStyle: TextStyle(
                                                             color: themeData
                                                                 .dividerColor
                                                                 .withOpacity(
                                                                     0.5))),
-                                                    // keyboardType:
-                                                    // TextInputType
-                                                    //     .,
+                                                    keyboardType:
+                                                        TextInputType.phone,
                                                     // validator: ,
                                                   ),
                                                 )),
                                           ],
-                                        ))
-                                  ],
-                                )),
-                          ),
-                          Padding(
-                            padding:
-                                EdgeInsets.only(right: 8, left: 8, bottom: 8),
-                            child: Container(
-                                width: Get.width,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: themeData.backgroundColor),
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
+                                        ),
+                                      ),
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                              right: 8, left: 8, bottom: 8),
+                                          child: Row(
                                             children: [
                                               Container(
-                                                // height: 35,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.blue,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10)),
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Icon(
-                                                    Icons.swap_horiz_rounded,
-                                                    color: themeData.cardColor,
-                                                  ),
-                                                ),
-                                              ),
+                                                  height: 50,
+                                                  width: Get.width * 0.15,
+                                                  alignment: Alignment.center,
+                                                  child: GestureDetector(
+                                                    onTap: () async {
+                                                      await FlutterContacts
+                                                          .requestPermission();
+                                                      final contact =
+                                                          await FlutterContacts
+                                                              .openExternalPick();
+                                                      print(contact!.name);
+                                                      print(contact.phones.first);
+                                                      nameController.text =
+                                                          contact.name.first;
+                                                      numberController.text =
+                                                          contact.phones.first
+                                                              .number;
+                                                      countryCodeController.text =
+                                                          contact.phones.first
+                                                              .normalizedNumber
+                                                              .replaceAll(
+                                                                  contact
+                                                                      .phones
+                                                                      .first
+                                                                      .number,
+                                                                  "");
+                                                      state(() {});
+                                                    },
+                                                    child: Icon(
+                                                      Icons
+                                                          .account_circle_rounded,
+                                                      color: Colors.blue,
+                                                      size: 40,
+                                                    ),
+                                                  )),
                                               SizedBox(
+                                                height: 5,
                                                 width: 10,
                                               ),
-                                              Text(
-                                                "Repeat".tr,
-                                                style: TextStyle(
-                                                    color:
-                                                        themeData.dividerColor),
-                                              )
+                                              Container(
+                                                  decoration: BoxDecoration(
+                                                      color: themeData.cardColor,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15)),
+                                                  height: 50,
+                                                  width: Get.width -
+                                                      (Get.width * 0.3),
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.only(left: 8),
+                                                    child: TextFormField(
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty) {
+                                                          return 'Please enter name'
+                                                              .tr;
+                                                        }
+                                                        return null;
+                                                      },
+                                                      style: TextStyle(
+                                                          color: themeData
+                                                              .dividerColor),
+                                                      controller: nameController,
+                                                      decoration: InputDecoration(
+                                                          border:
+                                                              InputBorder.none,
+                                                          hintText: "Add Name".tr,
+                                                          hintMaxLines: 2,
+                                                          hintStyle: TextStyle(
+                                                              color: themeData
+                                                                  .dividerColor
+                                                                  .withOpacity(
+                                                                      0.5))),
+                                                      // keyboardType:
+                                                      // TextInputType
+                                                      //     .,
+                                                      // validator: ,
+                                                    ),
+                                                  )),
                                             ],
-                                          ),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              showDialog1(
-                                                CupertinoPicker(
-                                                  magnification: 1.22,
-                                                  squeeze: 1.2,
-                                                  useMagnifier: true,
-                                                  itemExtent: _kItemExtent,
+                                          ))
+                                    ],
+                                  )),
+                            ),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(right: 8, left: 8, bottom: 8),
+                              child: Container(
+                                  width: Get.width,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: themeData.backgroundColor),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  // height: 35,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blue,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Icon(
+                                                      Icons.swap_horiz_rounded,
+                                                      color: themeData.cardColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  "Repeat".tr,
+                                                  style: TextStyle(
+                                                      color:
+                                                          themeData.dividerColor),
+                                                )
+                                              ],
+                                            ),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                FocusManager.instance.primaryFocus?.unfocus();
+                                                showDialog1(
+                                                  CupertinoPicker(
+                                                    magnification: 1.22,
+                                                    squeeze: 1.2,
+                                                    useMagnifier: true,
+                                                    itemExtent: _kItemExtent,
 
-                                                  // This is called when selected item is changed.
-                                                  onSelectedItemChanged:
-                                                      (int selectedItem) {
-                                                    state(() {
-                                                      selectedDay =
-                                                          selectedItem;
-                                                      // final temp = dayList[0];
-                                                      // dayList[0] = dayList[selectedDay];
-                                                      // dayList[selectedDay] = temp;
-                                                      print(selectedDay);
-                                                    });
-                                                    state(() {});
-                                                  },
-                                                  children:
-                                                      List<Widget>.generate(
-                                                          dayList.length,
-                                                          (int index) {
-                                                    return Center(
-                                                      child: Text(
-                                                        dayList[index],
-                                                      ),
-                                                    );
-                                                  }),
-                                                ),
-                                              );
-                                            },
-                                            child: Container(
-                                              // height: 35,
-                                              decoration: BoxDecoration(
-                                                  color: themeData.cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                              alignment: Alignment.center,
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Text(
-                                                    dayList[selectedDay],
-                                                    style: TextStyle(
-                                                        color: themeData
-                                                            .dividerColor),
-                                                  )),
-                                            ),
-                                          )
-                                        ],
+                                                    // This is called when selected item is changed.
+                                                    onSelectedItemChanged:
+                                                        (int selectedItem) {
+                                                      state(() {
+                                                        selectedDay =
+                                                            selectedItem;
+                                                        // final temp = dayList[0];
+                                                        // dayList[0] = dayList[selectedDay];
+                                                        // dayList[selectedDay] = temp;
+                                                        print(selectedDay);
+                                                      });
+                                                      state(() {});
+                                                    },
+                                                    children:
+                                                        List<Widget>.generate(
+                                                            dayList.length,
+                                                            (int index) {
+                                                      return Center(
+                                                        child: Text(
+                                                          dayList[index],
+                                                        ),
+                                                      );
+                                                    }),
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                // height: 35,
+                                                decoration: BoxDecoration(
+                                                    color: themeData.cardColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                alignment: Alignment.center,
+                                                child: Padding(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Text(
+                                                      dayList[selectedDay],
+                                                      style: TextStyle(
+                                                          color: themeData
+                                                              .dividerColor),
+                                                    )),
+                                              ),
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                )),
-                          ),
-                          Padding(
-                            padding:
-                                EdgeInsets.only(right: 8, left: 8, bottom: 8),
-                            child: Container(
-                                width: Get.width,
+                                    ],
+                                  )),
+                            ),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(right: 8, left: 8, bottom: 8),
+                              child: Container(
+                                  width: Get.width,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      color: themeData.backgroundColor),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  // height: 35,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.orange,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Icon(
+                                                      Icons
+                                                          .calendar_month_rounded,
+                                                      color: themeData.cardColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  "Date".tr,
+                                                  style: TextStyle(
+                                                      color:
+                                                          themeData.dividerColor),
+                                                )
+                                              ],
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                FocusManager.instance.primaryFocus?.unfocus();
+
+                                                showDialog1(
+                                                  CupertinoDatePicker(
+                                                    initialDateTime: date,
+                                                    mode: CupertinoDatePickerMode
+                                                        .date,
+                                                    use24hFormat: true,
+                                                    // This is called when the user changes the date.
+                                                    onDateTimeChanged:
+                                                        (DateTime newDate) {
+                                                      state(() {
+                                                        date = newDate;
+                                                        day = DateFormat('EEEE')
+                                                            .format(date);
+                                                        print(day);
+                                                      });
+                                                      state(() {});
+                                                    },
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                height: 35,
+                                                decoration: BoxDecoration(
+                                                    color: themeData.cardColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                alignment: Alignment.center,
+                                                child: Padding(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Text(
+                                                      "${date.day}-${date.month}",
+                                                      style: TextStyle(
+                                                          color: themeData
+                                                              .dividerColor),
+                                                    )),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Divider(),
+                                      Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  // height: 35,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.orange,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Icon(
+                                                      Icons.watch_later_outlined,
+                                                      color: themeData.cardColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  "Time".tr,
+                                                  style: TextStyle(
+                                                      color:
+                                                          themeData.dividerColor),
+                                                )
+                                              ],
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                FocusManager.instance.primaryFocus?.unfocus();
+
+                                                showDialog1(
+                                                  CupertinoDatePicker(
+                                                    initialDateTime: time,
+                                                    mode: CupertinoDatePickerMode
+                                                        .time,
+                                                    use24hFormat: true,
+                                                    // This is called when the user changes the time.
+                                                    onDateTimeChanged:
+                                                        (DateTime newTime) {
+                                                      state(() => time = newTime);
+                                                    },
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                height: 35,
+                                                decoration: BoxDecoration(
+                                                    color: themeData.cardColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                alignment: Alignment.center,
+                                                child: Padding(
+                                                    padding: EdgeInsets.all(5),
+                                                    child: Text(
+                                                      "${time.hour}-${time.minute}",
+                                                      style: TextStyle(
+                                                          color: themeData
+                                                              .dividerColor),
+                                                    )),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(right: 8, left: 8, bottom: 8),
+                              child: Container(
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: themeData.backgroundColor),
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                // height: 35,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.orange,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10)),
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Icon(
-                                                    Icons
-                                                        .calendar_month_rounded,
-                                                    color: themeData.cardColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Text(
-                                                "Date".tr,
-                                                style: TextStyle(
-                                                    color:
-                                                        themeData.dividerColor),
-                                              )
-                                            ],
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              showDialog1(
-                                                CupertinoDatePicker(
-                                                  initialDateTime: date,
-                                                  mode: CupertinoDatePickerMode
-                                                      .date,
-                                                  use24hFormat: true,
-                                                  // This is called when the user changes the date.
-                                                  onDateTimeChanged:
-                                                      (DateTime newDate) {
-                                                    state(() {
-                                                      date = newDate;
-                                                      day = DateFormat('EEEE')
-                                                          .format(date);
-                                                      print(day);
-                                                    });
-                                                    state(() {});
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                            child: Container(
-                                              height: 35,
-                                              decoration: BoxDecoration(
-                                                  color: themeData.cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                              alignment: Alignment.center,
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Text(
-                                                    "${date.day}-${date.month}",
-                                                    style: TextStyle(
-                                                        color: themeData
-                                                            .dividerColor),
-                                                  )),
-                                            ),
-                                          )
-                                        ],
+                                    color: themeData.backgroundColor,
+                                    borderRadius: BorderRadius.circular(15)),
+                                // height: 50,
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8),
+                                  child: TextFormField(
+                                    maxLines: 4,
+                                    keyboardType: TextInputType.multiline,
+                                    style:
+                                        TextStyle(color: themeData.dividerColor),
+                                    controller: messageController,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "Add Message".tr,
+                                      hintMaxLines: 5,
+                                      hintStyle: TextStyle(
+                                        color: themeData.dividerColor
+                                            .withOpacity(0.5),
                                       ),
-                                    ),
-                                    Divider(),
-                                    Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                // height: 35,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.orange,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10)),
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Icon(
-                                                    Icons.watch_later_outlined,
-                                                    color: themeData.cardColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 10,
-                                              ),
-                                              Text(
-                                                "Time".tr,
-                                                style: TextStyle(
-                                                    color:
-                                                        themeData.dividerColor),
-                                              )
-                                            ],
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              showDialog1(
-                                                CupertinoDatePicker(
-                                                  initialDateTime: time,
-                                                  mode: CupertinoDatePickerMode
-                                                      .time,
-                                                  use24hFormat: true,
-                                                  // This is called when the user changes the time.
-                                                  onDateTimeChanged:
-                                                      (DateTime newTime) {
-                                                    state(() => time = newTime);
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                            child: Container(
-                                              height: 35,
-                                              decoration: BoxDecoration(
-                                                  color: themeData.cardColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                              alignment: Alignment.center,
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(5),
-                                                  child: Text(
-                                                    "${time.hour}-${time.minute}",
-                                                    style: TextStyle(
-                                                        color: themeData
-                                                            .dividerColor),
-                                                  )),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                          ),
-                          Padding(
-                            padding:
-                                EdgeInsets.only(right: 8, left: 8, bottom: 8),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: themeData.backgroundColor,
-                                  borderRadius: BorderRadius.circular(15)),
-                              // height: 50,
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 8),
-                                child: TextFormField(
-                                  maxLines: 4,
-                                  keyboardType: TextInputType.multiline,
-                                  style:
-                                      TextStyle(color: themeData.dividerColor),
-                                  controller: messageController,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    hintText: "Add Message".tr,
-                                    hintMaxLines: 5,
-                                    hintStyle: TextStyle(
-                                      color: themeData.dividerColor
-                                          .withOpacity(0.5),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -1152,14 +1166,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   },
                   child: Text('Yes'.tr,
                       style: TextStyle(
-                          color: Colors.red,
+                          color: Colors.grey,
                           fontSize: 16,
                           fontFamily: 'SFProDisplay'))),
               TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('No'.tr)),
+                  child: Text('No'.tr, style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontFamily: 'SFProDisplay'))),
             ],
           );
         });
@@ -1173,23 +1190,34 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             title: Text('Delete!'.tr),
             content: Text("Sure Delete".tr),
             actions: [
-              TextButton(
-                  onPressed: () async {
-                    _cancelNotification(int.parse(
-                        notificationList![i].notificationId.toString()));
-                    deleteData(notificationList![i].id);
-                    Navigator.pop(context);
-                  },
-                  child: Text('Yes'.tr,
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontFamily: 'SFProDisplay'))),
-              TextButton(
+              MaterialButton(
+                onPressed: () {
+                  _cancelNotification(int.parse(
+                      notificationList![i].notificationId.toString()));
+                  deleteData(notificationList![i].id);
+                  Navigator.pop(context);
+                },
+                color: Colors.green,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                child: Text('Yes'.tr,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'SFProDisplay')),
+              ),
+              MaterialButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('No'.tr)),
+                  color: Colors.green,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: Text('No'.tr,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'SFProDisplay'),),)
             ],
           );
         });
@@ -1197,6 +1225,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: themeData.backgroundColor,
@@ -1211,7 +1240,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset("assets/images/noData.png"),
+                        Image.asset("assets/images/noData.png",width: Get.width / 2,),
+                        SizedBox(height: 20,),
                         Padding(
                           padding: EdgeInsets.only(left: 8, right: 8),
                           child: Text(
@@ -1240,13 +1270,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         itemBuilder: (context, i) => Padding(
                             padding: EdgeInsets.only(top: 8),
                             child: Slidable(
+                              // groupTag: "a",
+                              closeOnScroll: true,
                                 endActionPane: ActionPane(
                                   extentRatio: 0.25,
-                                  // dismissible: Container(
-                                  //   height: 50,
-                                  //   width: 50,
-                                  //   color: Colors.blue,
-                                  // ),
+
                                   motion: ScrollMotion(),
                                   children: [
                                     SlidableAction(
@@ -1334,7 +1362,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                                         "null"
                                                     ? "No message"
                                                     : notificationList![i]
-                                                        .message!,
+                                                        .message!.trim(),
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                     color: themeData
@@ -1356,7 +1384,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                                 ),
                                                 Text(
                                                   notificationList![i]
-                                                      .repeatDay!,
+                                                      .repeatDay!.tr,
                                                   style: TextStyle(
                                                       color: themeData
                                                           .dividerColor
@@ -1392,4 +1420,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
 }

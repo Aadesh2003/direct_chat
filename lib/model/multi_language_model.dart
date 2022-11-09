@@ -31,7 +31,7 @@ class MultiLanguageModel extends Translations {
               "You like this app ? Then take a little bit of your time to leave a rating :",
           "Notification Title": "Notification Title",
           "Delete!": "Delete !",
-          "Sure Delete": "Are you sure ?",
+          "Sure Delete": "Do you want to delete?",
           "WhatsApp": "WhatsApp",
           "Text Message": "Text Message",
           "Add Number": "Add Number",

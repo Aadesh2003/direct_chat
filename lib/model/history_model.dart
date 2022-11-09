@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final historyModel = historyModelFromJson(jsonString);
-
 import 'dart:convert';
 
 List<HistoryModel> historyModelFromJson(String str) => List<HistoryModel>.from(json.decode(str).map((x) => HistoryModel.fromJson(x)));

@@ -48,7 +48,7 @@ class DB {
     Database db = await instance.database;
     var result = await db.rawQuery(
         'SELECT * FROM historyTable');
-    return result.map((e) => HistoryModel.fromMap(e)).toList();
+    return result.map((e) => HistoryModel.fromMap(e)).toList().reversed.toList();
   }
   Future<List<NotificationDataModel>?> getAllNotificationData() async {
     Database db = await instance.database;
@@ -58,15 +58,11 @@ class DB {
   }
 
   Future<void> insertInHistory(HistoryModel value) async {
-    // INSERT INTO historyTable (countryCode, name, number, message, textORwa)
-    // VALUES ('aadi', 'Tom B. Erichsen', 'Skagen 21', 'Stavanger', 'Norway');
     Database db = await instance.database;
     var result = await db.rawInsert(
         'INSERT INTO historyTable (name, phone_number, message, type,country_code,created_date)  VALUES(?, ?, ?, ?, ?, ?)', [value.name.toString(), value.phoneNumber.toString(), value.message.toString(), value.type.toString(),value.countryCode.toString(),value.createdDate.toString()]);
   }
   Future<void> insertInNotification(NotificationDataModel value) async {
-    // INSERT INTO historyTable (countryCode, name, number, message, textORwa)
-    // VALUES ('aadi', 'Tom B. Erichsen', 'Skagen 21', 'Stavanger', 'Norway');
     Database db = await instance.database;
     var result = await db.rawInsert(
         'INSERT INTO notificationTable (country_code, message, name,notification_id,number,repeat_day,type,time,title,date,created_time)  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [value.countryCode.toString(), value.message.toString(), value.name.toString(), value.notificationId.toString(),value.number.toString(),value.repeatDay.toString(),value.type.toString(),value.time.toString(),value.title.toString(),value.date.toString(),value.createdTime.toString()]);
@@ -75,14 +71,13 @@ class DB {
   Future<void> deleteSingleFromNotification(id) async {
     Database db = await instance.database;
     var result = await db.rawDelete(
-        // 'INSERT INTO historyTable (name, number, message, textORwa)  VALUES(?, ?, ?, ?)', [value.name.toString(), value.number.toString(), value.message.toString(), value.textORwa.toString()]
-      'DELETE FROM notificationTable WHERE id=$id'
+        'DELETE FROM notificationTable WHERE id=$id'
     );
-  }Future<void> deleteSingle(id) async {
+  }
+  Future<void> deleteSingle(id) async {
     Database db = await instance.database;
     var result = await db.rawDelete(
-        // 'INSERT INTO historyTable (name, number, message, textORwa)  VALUES(?, ?, ?, ?)', [value.name.toString(), value.number.toString(), value.message.toString(), value.textORwa.toString()]
-      'DELETE FROM historyTable WHERE id=$id'
+         'DELETE FROM historyTable WHERE id=$id'
     );
   }
 

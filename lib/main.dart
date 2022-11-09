@@ -1,8 +1,12 @@
-// ignore_for_file: use_key_in_widget_constructors, must_be_immutable, prefer_final_fields, prefer_const_constructors, avoid_print, unused_local_variable, deprecated_member_use, prefer_typing_uninitialized_variables, avoid_unnecessary_containers
+// ignore_for_file: use_key_in_widget_constructors, must_be_immutable, prefer_final_fields, prefer_const_constructors, avoid_print, unused_local_variable, deprecated_member_use, prefer_typing_uninitialized_variables, avoid_unnecessary_containers, must_call_super
+
+import 'dart:io';
 
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:direct_chat/preferences/language_selected_pref.dart';
+import 'package:direct_chat/screens/language_selection_screen.dart';
+import 'package:direct_chat/screens/whatsapp_web_screen.dart';
 import 'package:direct_chat/tabs/keyboard_screen.dart';
-import 'package:direct_chat/tabs/recent_screen.dart';
 import 'package:direct_chat/tabs/schedule_screen.dart';
 import 'package:direct_chat/tabs/setting_screen.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +21,8 @@ import 'model/multi_language_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 PageController pageController = PageController();
+
+var isLangselected = false;
 
 final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -49,6 +55,10 @@ void main() async {
   var payLoad = "";
   var details =
       await FlutterLocalNotificationsPlugin().getNotificationAppLaunchDetails();
+  var result = await LanguageSelectedPref().getString();
+  if(result == "selected"){
+    isLangselected = true;
+  }
   if (details != null) {
     if (details.didNotificationLaunchApp) {
       print(details.payload);
@@ -73,15 +83,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  RateMyApp _rateMyApp = RateMyApp(
-    preferencesPrefix: "rateMyApp_",
-    minDays: 3,
-    minLaunches: 7,
-    remindDays: 2,
-    remindLaunches: 5,
-    googlePlayIdentifier: "com.sunraylabs.socialtags",
-    // appStoreIdentifier: ‘1491556149’,
-  );
+
 
   @override
   void initState() {
@@ -113,24 +115,31 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(rateMyApp: _rateMyApp, payLoad: widget.payLoad),
+      home: !isLangselected ? LanguageSelectionScreen() : MyHomePage(payLoad: widget.payLoad),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  RateMyApp? rateMyApp;
   String? payLoad;
 
-  MyHomePage({this.rateMyApp, this.payLoad});
+  MyHomePage({ this.payLoad});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMixin {
   var notification = "";
-
+  RateMyApp _rateMyApp = RateMyApp(
+    preferencesPrefix: "rateMyApp_",
+    minDays: 1,
+    minLaunches: 1,
+    remindDays: 2,
+    remindLaunches: 3,
+    googlePlayIdentifier: "com.sunraylabs.socialtags",
+    // appStoreIdentifier: ‘1491556149’,
+  );
   @override
   void initState() {
     // TODO: implement initState
@@ -138,10 +147,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     pageController = PageController(initialPage: _bottomNavIndex);
     if (widget.payLoad == null || widget.payLoad == "") {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        widget.rateMyApp!.init().then((_) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _rateMyApp.init().then((_) {
           // if (widget.rateMyApp!.shouldOpenDialog) {
-          widget.rateMyApp!.showStarRateDialog(
+          _rateMyApp.showStarRateDialog(
             context,
             title: "Rate this app".tr,
             // The dialog title.
@@ -152,18 +161,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 TextButton(
                   child: Text("Ok".tr),
                   onPressed: () async {
+                    print("+_+_+_+_+_+_+_+_+_\n ~ ~ ~");
+                    await _rateMyApp
+                        .callEvent(RateMyAppEventType.rateButtonPressed);
                     print("Thanks for the " +
                         (stars == null ? "0" : stars.round().toString()) +
                         " star(s) !");
                     if (stars != null) {
-                      widget.rateMyApp!
-                          .save()
-                          .then((value) => Navigator.pop(context));
+                      _rateMyApp.save().then((value) => Navigator.pop(context));
                       if (stars <= 3) {
                         print("3 or less");
                       } else if (stars <= 5) {
                         print("4 or 5 ");
-                        widget.rateMyApp!.launchStore();
+                        _rateMyApp.launchStore();
                       }
                     } else {
                       Navigator.pop(context);
@@ -188,14 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             starRatingOptions:
                 const StarRatingOptions(), // Custom star bar rating options.
-            onDismissed: () => widget.rateMyApp!.callEvent(RateMyAppEventType
+            onDismissed: () => _rateMyApp.callEvent(RateMyAppEventType
                 .laterButtonPressed), // Called when the user dismissed the dialog (either by taping outside or by pressing the “back” button).
           );
         });
       });
     } else {
       setState(() {});
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
         await Future.delayed(Duration(seconds: 2));
         var value = widget.payLoad;
         androidDialog(value);
@@ -325,13 +335,15 @@ class _MyHomePageState extends State<MyHomePage> {
       resizeToAvoidBottomInset: false,
       backgroundColor: themeData.backgroundColor,
       body: PageView(
-        onPageChanged: (i) {
-          setState(() => _bottomNavIndex = i);
-        },
+        // onPageChanged: (i) {
+        //   setState(() => _bottomNavIndex = i);
+        // },
+        physics: NeverScrollableScrollPhysics(),
         controller: pageController,
         children: [
           KeyboardScreen(),
-          RecentScreen(),
+          if(Platform.isIOS)
+            WhatsAppWebScreen(),
           ScheduleScreen(),
           SettingScreen(payLoad: widget.payLoad)
         ],
@@ -350,28 +362,29 @@ class _MyHomePageState extends State<MyHomePage> {
               items: [
                 SalomonBottomBarItem(
                   unselectedColor: themeData.dividerColor,
-                  icon: Icon(Icons.keyboard_alt_outlined),
-                  title: Container(
+                  icon: Icon(Icons.dialpad_rounded),
+                  title: SizedBox(
                     width: Get.width * 0.2,
                     child: FittedBox(
                         fit: BoxFit.scaleDown, child: Text("Keyboard".tr)),
                   ),
                   selectedColor: Colors.green,
                 ),
-                SalomonBottomBarItem(
+                if(Platform.isIOS)
+                  SalomonBottomBarItem(
                   unselectedColor: themeData.dividerColor,
-                  icon: Icon(Icons.history),
-                  title: Container(
+                  icon: Icon(Icons.whatsapp),
+                  title: SizedBox(
                     width: Get.width * 0.2,
                     child: FittedBox(
-                        fit: BoxFit.scaleDown, child: Text("Recent".tr)),
+                        fit: BoxFit.scaleDown, child: Text("Dual WhatsApp".tr)),
                   ),
                   selectedColor: Colors.green,
                 ),
                 SalomonBottomBarItem(
                   unselectedColor: themeData.dividerColor,
-                  icon: Icon(Icons.calendar_month_outlined),
-                  title: Container(
+                  icon: Icon(Icons.schedule_rounded),
+                  title: SizedBox(
                     width: Get.width * 0.2,
                     child: FittedBox(
                         fit: BoxFit.scaleDown, child: Text("Schedule".tr)),
@@ -383,7 +396,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   icon: Icon(
                     Icons.settings_outlined,
                   ),
-                  title: Container(
+                  title: SizedBox(
                     width: Get.width * 0.2,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
@@ -397,4 +410,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

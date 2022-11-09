@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, must_call_super, deprecated_member_use, prefer_if_null_operators, prefer_typing_uninitialized_variables
 
 import 'dart:io';
 
@@ -20,7 +20,8 @@ class RecentScreen extends StatefulWidget {
   State<RecentScreen> createState() => _RecentScreenState();
 }
 
-class _RecentScreenState extends State<RecentScreen> {
+class _RecentScreenState extends State<RecentScreen>
+    with AutomaticKeepAliveClientMixin {
   List<HistoryModel>? historyData;
   var isLoading = true;
 
@@ -54,7 +55,7 @@ class _RecentScreenState extends State<RecentScreen> {
               child: Text(
                 'Yes'.tr,
                 style: const TextStyle(
-                    color: Colors.red,
+                    color: Colors.black,
                     fontSize: 16,
                     fontFamily: 'SFProDisplay'),
               ),
@@ -63,7 +64,11 @@ class _RecentScreenState extends State<RecentScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: Text('No'.tr)),
+                child: Text('No'.tr,
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'SFProDisplay'))),
           ],
         );
       },
@@ -78,21 +83,32 @@ class _RecentScreenState extends State<RecentScreen> {
             title: Text('Delete!'.tr),
             content: Text("Sure Delete".tr),
             actions: [
-              TextButton(
-                  onPressed: () async {
-                    deleteData(historyData![i].id);
-                    Navigator.pop(context);
-                  },
-                  child: Text('Yes'.tr,
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontFamily: 'SFProDisplay'))),
-              TextButton(
+              MaterialButton(
+                onPressed: () {
+                  deleteData(historyData![i].id);
+                  Navigator.pop(context);
+                },
+                color: Colors.green,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                child: Text('Yes'.tr,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'SFProDisplay')),
+              ),
+              MaterialButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text('No'.tr)),
+                  color: Colors.green,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: Text('No'.tr,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'SFProDisplay'),),)
             ],
           );
         });
@@ -115,7 +131,7 @@ class _RecentScreenState extends State<RecentScreen> {
       if (await canLaunch(url)) {
         await launch(url);
       } else {
-        throw 'Could not launch ${url}';
+        throw 'Could not launch $url';
       }
     } else {
       final Uri smsLaunchUri = Uri(
@@ -128,7 +144,7 @@ class _RecentScreenState extends State<RecentScreen> {
       if (await canLaunchUrl(smsLaunchUri)) {
         await launchUrl(smsLaunchUri);
       } else {
-        throw 'Could not launch ${smsLaunchUri}';
+        throw 'Could not launch $smsLaunchUri';
       }
     }
 
@@ -142,11 +158,27 @@ class _RecentScreenState extends State<RecentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(historyData);
     return Scaffold(
         appBar: AppBar(
+          foregroundColor: Colors.black,
           backgroundColor: themeData.cardColor,
           elevation: 0,
           centerTitle: true,
+          actions: [
+            TextButton(
+                onPressed: () async {
+                  if (historyData!.isNotEmpty) {
+                    for (var i = 0; i < historyData!.length; i++) {
+                      await DB.instance.deleteSingle(historyData![i].id);
+                      // deleteData();
+                    }
+                    historyData!.clear();
+                  }
+                  setState(() {});
+                },
+                child: const Text("Clear"))
+          ],
           title: Text(
             "Recent".tr,
             style: TextStyle(
@@ -166,8 +198,11 @@ class _RecentScreenState extends State<RecentScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              "assets/images/noData.png",
-                              width: Get.width,
+                              "assets/images/chat.png",
+                              width: Get.width / 2,
+                            ),
+                            const SizedBox(
+                              height: 20,
                             ),
                             Text(
                               "No Recent".tr,
@@ -175,11 +210,12 @@ class _RecentScreenState extends State<RecentScreen> {
                             ),
                             TextButton(
                                 onPressed: () {
-                                  pageController.jumpToPage(0);
+                                  Navigator.pop(context);
+                                  // pageController.jumpToPage(0);
                                 },
                                 child: Text(
                                   "Add Recent".tr,
-                                  style: TextStyle(color: Colors.green),
+                                  style: const TextStyle(color: Colors.green),
                                 ))
                           ],
                         ),
@@ -218,7 +254,9 @@ class _RecentScreenState extends State<RecentScreen> {
                                             ? true
                                             : false,
                                         historyData![i].countryCode,
-                                        historyData![i].message == "null" ? "" :  historyData![i].message);
+                                        historyData![i].message == "null"
+                                            ? ""
+                                            : historyData![i].message);
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -306,7 +344,8 @@ class _RecentScreenState extends State<RecentScreen> {
                                                 const SizedBox(
                                                   width: 5,
                                                 ),
-                                                Text(timeAgo(DateTime.parse(
+                                                Text(
+                                                  timeAgo(DateTime.parse(
                                                       historyData![i]
                                                           .createdDate!)),
                                                   style: TextStyle(
@@ -325,4 +364,8 @@ class _RecentScreenState extends State<RecentScreen> {
                                 ))),
                       )));
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

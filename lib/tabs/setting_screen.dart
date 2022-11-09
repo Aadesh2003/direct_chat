@@ -18,7 +18,7 @@ class SettingScreen extends StatefulWidget {
   State<SettingScreen> createState() => _SettingScreenState();
 }
 
-class _SettingScreenState extends State<SettingScreen> {
+class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveClientMixin{
   final RateMyApp _rateMyApp = RateMyApp(
     preferencesPrefix: "rateMyApp_",
     minDays: 3,
@@ -50,6 +50,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: themeData.backgroundColor,
       appBar: AppBar(
@@ -64,6 +65,16 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
       body:Column(
         children: [
+          // Hero(
+          //   tag: 'appBar',
+          //   child: Material(
+          //     child: Text(
+          //       "Setting".tr,
+          //       style: TextStyle(
+          //           color: themeData.dividerColor, fontWeight: FontWeight.bold),
+          //     ),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Container(
@@ -77,15 +88,13 @@ class _SettingScreenState extends State<SettingScreen> {
                     onTap: (){
                       // var url = Uri.parse("https://www.google.com");
                       // launchUrl(url);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LanguageSelectionScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()));
                     },
                     child: Container(
                       color: Colors.transparent,
                       child:   Padding(padding: const EdgeInsets.all(10),child: Row(
                         children: [
-                          Container(
-                            child:  Padding(padding: EdgeInsets.all(3),child: Icon(Icons.language_rounded,color: themeData.dividerColor),),
-                          ),
+                          Padding(padding: const EdgeInsets.all(3),child: Icon(Icons.language_rounded,color: themeData.dividerColor),),
                           const SizedBox(width: 15,),
                           Expanded(
                             child: FittedBox(
@@ -145,7 +154,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),),
                     ),
                   ),
-                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor,),),
+                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor.withOpacity(0.2),),),
                   GestureDetector(
                     onTap: (){
                          var link = "https://www.google.com";
@@ -178,7 +187,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       color: Colors.transparent,
                     ),
                   ),
-                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor,),),
+                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor.withOpacity(0.2),),),
                   GestureDetector(
                     onTap: (){
                       final Uri emailLaunchUri = Uri(
@@ -216,10 +225,10 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),),
                     ),
                   ),
-                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor,),),
+                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor.withOpacity(0.2).withOpacity(0.2),),),
                   GestureDetector(
                     onTap: (){
-                      var url = Uri.parse("https://play.google.com/store/apps/dev?id=6577204690045492686");
+                      var url = Uri.parse("https://play.google.com/store/apps/developer?id=UnityApp");
                       launchUrl(url);
                     },
                     child: Padding(padding: const EdgeInsets.all(10),child: Row(
@@ -290,7 +299,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ),),
                     ),
                   ),
-                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor,),),
+                  Padding(padding: const EdgeInsets.only(left: 10,right: 10),child: Container(height: 0.5,color: themeData.dividerColor.withOpacity(0.2),),),
                   GestureDetector(
                     onTap: (){
                       var url = Uri.parse("https://www.google.com");
@@ -330,4 +339,9 @@ class _SettingScreenState extends State<SettingScreen> {
       )
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
 }
