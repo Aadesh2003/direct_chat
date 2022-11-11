@@ -120,12 +120,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               ),
             ),
             isLangselected ? languageList[index] == selectionValue ? Container(
-              // height: 30,
-              // width: 30,
-              // decoration: BoxDecoration(
-              //     // color: themeData.dividerColor,
-              //     borderRadius: BorderRadius.only(topLeft: Radius.circular(15),bottomRight: Radius.circular(10))
-              // ),
               child: Padding(
                 padding: const EdgeInsets.all(5),
                 child: Icon(Icons.check_circle_outline_rounded,color: themeData.dividerColor,),
@@ -146,8 +140,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         title: Text("Choose Language".tr),
         elevation: 0,
       ),
-      // Hero(tag: 'appBar',child: Material(child: Text("Choose Language".tr,style: TextStyle(fontSize: 45),))),
-
       body: GridView.count(
         shrinkWrap: true,
         crossAxisCount: 2,

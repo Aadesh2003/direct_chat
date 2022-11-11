@@ -50,9 +50,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
 
   storeData(day, id, time, payLoad, value, title, number, message, type,
       model) async {
-    print("SELECTEDDAY : ${selectedDay}");
     if (day is String) {
-      print("=-=-=-=-=--");
       if (day == "Weekly") {
         var payLoad =
             "${number}@@@${nameController.text}@@@${message}@@@${type}";
@@ -76,7 +74,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
 
   getData() async {
     notificationList = await DB.instance.getAllNotificationData();
-    print(notificationList);
     isLoading = false;
     setState(() {});
   }
@@ -303,20 +300,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
 
   int selectedDay = 0;
 
-  // This shows a CupertinoModalPopup with a reasonable fixed height which hosts CupertinoPicker.
   showDialog1(Widget child) {
     showCupertinoModalPopup<void>(
         context: context,
         builder: (BuildContext context) => Container(
               height: 216,
               padding: const EdgeInsets.only(top: 6.0),
-              // The Bottom margin is provided to align the popup above the system navigation bar.
               margin: EdgeInsets.only(
                 bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-              // Provide a background color for the popup.
               color: CupertinoColors.systemBackground.resolveFrom(context),
-              // Use a SafeArea widget to avoid system overlaps.
               child: SafeArea(
                 top: false,
                 child: child,
@@ -334,7 +327,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
       initialDateTime: time,
       mode: CupertinoDatePickerMode.time,
       use24hFormat: true,
-      // This is called when the user changes the time.
       onDateTimeChanged: (DateTime newTime) {
         setState(() => time = newTime);
       },
@@ -376,10 +368,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
       numberController.text = dataModel.number!;
       nameController.text = dataModel.name!;
       date = DateTime.parse(dataModel.date!);
-      // print("-=-=-=-=-");
       selectedDay = dayLst.indexWhere((element) =>
           element.toLowerCase() == dataModel.repeatDay!.toLowerCase());
-      // DateTime.
       print(dataModel.time);
       time = DateTime.parse(
           '2021-10-04 ${dataModel.time!.split(":").first}:${dataModel.time!.split(":").last}:00.000Z');
@@ -392,17 +382,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
       numberController.text = "";
       nameController.text = "";
       date = DateTime.now();
-      // print("-=-=-=-=-");
       selectedDay = 0;
-      // DateTime.
-      // print(value.time);/
       time = DateTime.now();
       print(time.toString());
       messageController.text = "";
     }
     return showMaterialModalBottomSheet(
       backgroundColor: Colors.transparent,
-      // isScrollControlled: true,
       barrierColor: Colors.black38,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -479,7 +465,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                   int.parse(dataModel.notificationId.toString()));
                               deleteData(dataModel.id);
                               var payLoad = [];
-                              // var id = DateTime.now().toString().replaceAll(":", "").replaceAll(",", "").replaceAll(".", "").replaceAll("-", "").replaceAll(" ",  "").replaceAll(DateTime.now().year.toString(), "");
                               var id =
                                   "${DateTime.now().day.toString()}${DateTime.now().hour}${DateTime.now().minute}${DateTime.now().second}";
                               var title = titleController.text;
@@ -533,7 +518,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
               body: StatefulBuilder(
                 builder: (context, state) {
                   return SingleChildScrollView(
-
                     child: Container(
                       color: themeData.cardColor,
                       child: Form(
@@ -685,7 +669,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                                     0.5))),
                                                     keyboardType:
                                                         TextInputType.phone,
-                                                    // validator: ,
                                                   ),
                                                 )),
                                             SizedBox(
@@ -728,7 +711,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                                     0.5))),
                                                     keyboardType:
                                                         TextInputType.phone,
-                                                    // validator: ,
                                                   ),
                                                 )),
                                           ],
@@ -814,10 +796,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                                   .dividerColor
                                                                   .withOpacity(
                                                                       0.5))),
-                                                      // keyboardType:
-                                                      // TextInputType
-                                                      //     .,
-                                                      // validator: ,
                                                     ),
                                                   )),
                                             ],
@@ -844,7 +822,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                             Row(
                                               children: [
                                                 Container(
-                                                  // height: 35,
                                                   decoration: BoxDecoration(
                                                       color: Colors.blue,
                                                       borderRadius:
@@ -878,16 +855,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                     squeeze: 1.2,
                                                     useMagnifier: true,
                                                     itemExtent: _kItemExtent,
-
-                                                    // This is called when selected item is changed.
                                                     onSelectedItemChanged:
                                                         (int selectedItem) {
                                                       state(() {
                                                         selectedDay =
                                                             selectedItem;
-                                                        // final temp = dayList[0];
-                                                        // dayList[0] = dayList[selectedDay];
-                                                        // dayList[selectedDay] = temp;
                                                         print(selectedDay);
                                                       });
                                                       state(() {});
@@ -906,7 +878,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                 );
                                               },
                                               child: Container(
-                                                // height: 35,
                                                 decoration: BoxDecoration(
                                                     color: themeData.cardColor,
                                                     borderRadius:
@@ -948,7 +919,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                             Row(
                                               children: [
                                                 Container(
-                                                  // height: 35,
                                                   decoration: BoxDecoration(
                                                       color: Colors.orange,
                                                       borderRadius:
@@ -984,7 +954,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                     mode: CupertinoDatePickerMode
                                                         .date,
                                                     use24hFormat: true,
-                                                    // This is called when the user changes the date.
                                                     onDateTimeChanged:
                                                         (DateTime newDate) {
                                                       state(() {
@@ -1029,7 +998,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                             Row(
                                               children: [
                                                 Container(
-                                                  // height: 35,
                                                   decoration: BoxDecoration(
                                                       color: Colors.orange,
                                                       borderRadius:
@@ -1064,7 +1032,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                     mode: CupertinoDatePickerMode
                                                         .time,
                                                     use24hFormat: true,
-                                                    // This is called when the user changes the time.
                                                     onDateTimeChanged:
                                                         (DateTime newTime) {
                                                       state(() => time = newTime);
@@ -1103,7 +1070,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                 decoration: BoxDecoration(
                                     color: themeData.backgroundColor,
                                     borderRadius: BorderRadius.circular(15)),
-                                // height: 50,
                                 child: Padding(
                                   padding: EdgeInsets.only(left: 8),
                                   child: TextFormField(
@@ -1146,7 +1112,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
   deleteData(id) async {
     await DB.instance.deleteSingleFromNotification(id);
     getData();
-    // DateTime.parse(formattedString)
   }
 
   buildDeleteDialogueIos(i) {
@@ -1166,7 +1131,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                   },
                   child: Text('Yes'.tr,
                       style: TextStyle(
-                          color: Colors.grey,
+                          color: Colors.black,
                           fontSize: 16,
                           fontFamily: 'SFProDisplay'))),
               TextButton(
@@ -1174,7 +1139,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                     Navigator.pop(context);
                   },
                   child: Text('No'.tr, style: const TextStyle(
-                      color: Colors.grey,
+                      color: Colors.black,
                       fontSize: 16,
                       fontFamily: 'SFProDisplay'))),
             ],
@@ -1187,6 +1152,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
         context: context,
         builder: (context) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
             title: Text('Delete!'.tr),
             content: Text("Sure Delete".tr),
             actions: [
@@ -1210,12 +1177,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  color: Colors.green,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
                   child: Text('No'.tr,
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.green,
                           fontSize: 16,
                           fontFamily: 'SFProDisplay'),),)
             ],
@@ -1270,7 +1234,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                         itemBuilder: (context, i) => Padding(
                             padding: EdgeInsets.only(top: 8),
                             child: Slidable(
-                              // groupTag: "a",
                               closeOnScroll: true,
                                 endActionPane: ActionPane(
                                   extentRatio: 0.25,
@@ -1325,7 +1288,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                                   minWidth: 0.001,
                                                   maxWidth: Get.width * 0.25),
                                               child: Container(
-                                                // width: Get.width * 0.25,
                                                 child: Text(
                                                   notificationList![i].name! ==
                                                           "null"
@@ -1395,24 +1357,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> with AutomaticKeepAlive
                                             )
                                           ],
                                         ),
-                                        // Text("${historyData![i].message! == "null" ? "No message": historyData![i].name!}",style: TextStyle(color: themeData.dividerColor.withOpacity(0.5)),),
-                                        // trailing:
-                                        // IconButton(onPressed: (){
-                                        //
-                                        // }, icon: Icon(Icons.delete,color: themeData.dividerColor,)),
                                       ),
-                                      // child: Row(
-                                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      //   children: [
-                                      //     Text(
-                                      //       historyData![i].number!,
-                                      //       style: TextStyle(color: themeData.dividerColor),
-                                      //     ),
-                                      //     IconButton(onPressed: (){
-                                      //
-                                      //     }, icon: Icon(Icons.delete,color: themeData.dividerColor,))
-                                      //   ],
-                                      // )
                                     ),
                                   ),
                                 )))),

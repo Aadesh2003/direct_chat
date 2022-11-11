@@ -31,7 +31,6 @@ class DB {
       try {
         await Directory(dirname(path)).create(recursive: true);
       } catch (e) {
-        // print(e);
       }
 
       ByteData data = await rootBundle.load(join("assets/database", DBName));

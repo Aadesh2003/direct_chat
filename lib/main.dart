@@ -108,7 +108,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       translations: MultiLanguageModel(),
-      // showPerformanceOverlay: true,
       locale: Locale('en', 'US'),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
@@ -138,7 +137,6 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
     remindDays: 2,
     remindLaunches: 3,
     googlePlayIdentifier: "com.sunraylabs.socialtags",
-    // appStoreIdentifier: ‘1491556149’,
   );
   @override
   void initState() {
@@ -149,13 +147,10 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
     if (widget.payLoad == null || widget.payLoad == "") {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         _rateMyApp.init().then((_) {
-          // if (widget.rateMyApp!.shouldOpenDialog) {
           _rateMyApp.showStarRateDialog(
             context,
             title: "Rate this app".tr,
-            // The dialog title.
-            message: "Rating Content".tr, // The dialog message.
-            // contentBuilder: (context, defaultContent) => content, // This one allows you to change the default dialog content.
+            message: "Rating Content".tr,
             actionsBuilder: (context, stars) {
               return [
                 TextButton(
@@ -164,42 +159,29 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
                     print("+_+_+_+_+_+_+_+_+_\n ~ ~ ~");
                     await _rateMyApp
                         .callEvent(RateMyAppEventType.rateButtonPressed);
-                    print("Thanks for the " +
-                        (stars == null ? "0" : stars.round().toString()) +
-                        " star(s) !");
+
                     if (stars != null) {
                       _rateMyApp.save().then((value) => Navigator.pop(context));
                       if (stars <= 3) {
-                        print("3 or less");
                       } else if (stars <= 5) {
-                        print("4 or 5 ");
                         _rateMyApp.launchStore();
                       }
                     } else {
                       Navigator.pop(context);
                     }
-                    // You can handle the result as you want (for instance if the user puts 1 star then open your contact page, if he puts more then open the store page, etc...).
-                    // This allows to mimic the behavior of the default “Rate” button. See “Advanced > Broadcasting events” for more information :
-                    // await widget.rateMyApp!
-                    //     .callEvent(RateMyAppEventType.rateButtonPressed);
-                    // Navigator.pop<RateMyAppDialogButton>(
-                    //     navKey.currentContext!, RateMyAppDialogButton.rate);
                   },
                 ),
               ];
             },
-            // ignoreNativeDialog: Platform
-            //     .isAndroid, // Set to false if you want to show the Apple’s native app rating dialog on iOS or Google’s native app rating dialog (depends on the current Platform).
             dialogStyle: const DialogStyle(
-              // Custom dialog styles.
               titleAlign: TextAlign.center,
               messageAlign: TextAlign.center,
               messagePadding: EdgeInsets.only(bottom: 20),
             ),
             starRatingOptions:
-                const StarRatingOptions(), // Custom star bar rating options.
+                const StarRatingOptions(),
             onDismissed: () => _rateMyApp.callEvent(RateMyAppEventType
-                .laterButtonPressed), // Called when the user dismissed the dialog (either by taping outside or by pressing the “back” button).
+                .laterButtonPressed),
           );
         });
       });
@@ -214,8 +196,6 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
   }
 
   Future<void> _launchUrl(number, isWhatsapp, message) async {
-    // IOS API
-    // "https://api.whatsapp.com/send?phone=9712151416&text=HELLO"
     var url;
     if (isWhatsapp) {
       url =
@@ -239,13 +219,6 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
         throw 'Could not launch $smsLaunchUri';
       }
     }
-
-    print("URL : $url");
-    //
-
-    // if (!await launchUrl(Uri.parse("https://api.whatsapp.com"))) {
-    //   throw 'Could not launch $url';+615
-    // }
   }
 
   androidDialog(value1) async {
@@ -335,9 +308,6 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
       resizeToAvoidBottomInset: false,
       backgroundColor: themeData.backgroundColor,
       body: PageView(
-        // onPageChanged: (i) {
-        //   setState(() => _bottomNavIndex = i);
-        // },
         physics: NeverScrollableScrollPhysics(),
         controller: pageController,
         children: [
@@ -377,7 +347,7 @@ class _MyHomePageState extends State<MyHomePage> with AutomaticKeepAliveClientMi
                   title: SizedBox(
                     width: Get.width * 0.2,
                     child: FittedBox(
-                        fit: BoxFit.scaleDown, child: Text("Dual WhatsApp".tr)),
+                        fit: BoxFit.scaleDown, child: Text("Dual Whatsapp".tr)),
                   ),
                   selectedColor: Colors.green,
                 ),

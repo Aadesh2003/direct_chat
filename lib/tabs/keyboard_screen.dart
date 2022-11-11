@@ -57,10 +57,7 @@ class _KeyboardScreenState extends State<KeyboardScreen>
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           duration: Duration(milliseconds: 500),
         ));
-        // Get.snackbar(, "",
-        //     snackPosition: SnackPosition.BOTTOM);
       } catch (e) {
-        print(e);
       }
     }
   }
@@ -99,7 +96,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
             if (mainTitle[i] == "*") {
               var result = await Clipboard.getData("text/plain");
               var onlyDigit = RegExp(r'^[0-9]+$').hasMatch(result!.text!);
-              print(result);
               if (onlyDigit) {
                 numberController.text = result.text!;
                 _value = result.text!;
@@ -127,15 +123,12 @@ class _KeyboardScreenState extends State<KeyboardScreen>
           onLongPressStart: (e) {
             eraseCheck = true;
             setState(() {});
-            print("=-=-OnLongPressStart");
           },
           onLongPressDown: (e) {
-            print(e);
           },
           onLongPressEnd: (e) {
             eraseCheck = false;
             setState(() {});
-            print("=-=-OnLongPressEnd");
           },
           child: DialButton(
             icon: mainTitle[i] == "*" ? Icons.paste : Icons.backspace_outlined,
@@ -146,10 +139,8 @@ class _KeyboardScreenState extends State<KeyboardScreen>
       } else {
         items.add(GestureDetector(
           onTap: () {
-            print(mainTitle[i]);
             _value += mainTitle[i];
             numberController.text = _value;
-            print(numberController.text);
           },
           child: DialButton(
             title: mainTitle[i],
@@ -158,7 +149,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
         ));
       }
     }
-    //To Do: Fix this workaround for last row
     rows.add(
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: items));
     rows.add(SizedBox(
@@ -169,8 +159,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
 
   Future<void> _launchUrl(number, isWhatsapp) async {
     var temp = countryCodeController.text.replaceAll(" ▾", "");
-    // IOS API
-    // "https://api.whatsapp.com/send?phone=9712151416&text=HELLO"
     var url;
     if (isWhatsapp) {
       url =
@@ -194,13 +182,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
         throw 'Could not launch ${smsLaunchUri}';
       }
     }
-
-    print("URL : $url");
-    //
-
-    // if (!await launchUrl(Uri.parse("https://api.whatsapp.com"))) {
-    //   throw 'Could not launch $url';+615
-    // }
   }
 
   @override
@@ -210,13 +191,10 @@ class _KeyboardScreenState extends State<KeyboardScreen>
         getClipBoardData();
         break;
       case AppLifecycleState.inactive:
-        print("app in inactive");
         break;
       case AppLifecycleState.paused:
-        print("app in paused");
         break;
       case AppLifecycleState.detached:
-        print("app in detached");
         break;
     }
   }
@@ -237,39 +215,59 @@ class _KeyboardScreenState extends State<KeyboardScreen>
         context: context,
         builder: (context) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
             title: Text(value == "name" ? "Enter Name".tr : "Enter Message".tr),
-            content: TextField(
+            content: TextFormField(
+              autofocus: true,
               onChanged: (value) {},
               controller: value == "name" ? nameController : messageController,
               focusNode: value == "name" ? nameFocusNode : messageFocusNode,
               decoration: InputDecoration(
-                  hintText:
-                      value == "name" ? "Enter Name".tr : "Enter Message".tr),
+                  labelText: value == "name" ? "enter name textfield".tr : "enter message textfield".tr,
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: BorderSide(color: Colors.grey)),
+                  disabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: BorderSide(color: Colors.grey)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: BorderSide(color: Colors.green)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: BorderSide(color: Colors.green)),
+                  labelStyle: TextStyle(
+                      color: Colors.grey),
+                floatingLabelStyle: TextStyle(
+                    color: Colors.green),
+                 ),
             ),
             actions: [
               MaterialButton(
+                color: Colors.green,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 onPressed: () {
+                  if (value == "name") {
+                    if (nameController.text.trim() != null ) {
+                      name = nameController.text;
+                    }
+                    if(nameController.text.trim().isEmpty){
+                      name = null;
+                    }
+                  } else {
+                    if (messageController.text.trim() != null ) {
+                      message = messageController.text;
+                    }
+                    if(messageController.text.trim().isEmpty){
+                      message = null;
+                    }
+                  }
+                  setState((){});
                   Navigator.pop(context);
                 },
-                child: Text("Cancel".tr),
+                child: Text("Ok".tr,style: TextStyle(color: Colors.white),),
               ),
               MaterialButton(
                 onPressed: () {
-                  if (value == "name") {
-                    if (nameController.text.trim() != null ||
-                        nameController.text.trim().isEmpty) {
-                      name = nameController.text;
-                    }
-                  } else {
-                    if (messageController.text.trim() != null ||
-                        messageController.text.trim().isEmpty) {
-                      message = messageController.text;
-                    }
-                  }
                   Navigator.pop(context);
                 },
-                child: Text("Ok".tr),
-              )
+                elevation: 0,
+                child: Text("Cancel".tr,style: TextStyle(color: Colors.green),),
+              ),
+
             ],
           );
         });
@@ -278,7 +276,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
   storeData(HistoryModel value) async {
     DB.instance.insertInHistory(value);
     var historyData = await DB.instance.getAll();
-    print(historyData);
   }
 
   @override
@@ -296,7 +293,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
     if (country != null) {
       setState(() {
         var _selectedCountry = country;
-        // print(_selectedCountry);
         countryCodeController.text =
             "${_selectedCountry.callingCode.toString()} ▾";
       });
@@ -333,10 +329,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                             fontSize: sizeFactor / 2,
                           ),
                           decoration: InputDecoration(
-                              // suffix: Icon(
-                              //   Icons.keyboard_arrow_down_rounded,
-                              //   color: themeData.dividerColor,
-                              // ),
                               border: InputBorder.none,
                               hintText: "+91",
                               hintMaxLines: 2,
@@ -344,16 +336,12 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                                   fontSize: sizeFactor / 2,
                                   color:
                                       themeData.dividerColor.withOpacity(0.5))),
-                          // keyboardType:
-                          // TextInputType.phone,
-                          // validator: ,
                         ),
                       ),
                     ],
                   ),
                   Expanded(
                     child: AutoSizeTextField(
-                      // minFontSize: sizeFactor / 3,
                       fullwidth: false,
                       minFontSize: 25,
                       readOnly: true,
@@ -364,7 +352,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(border: InputBorder.none),
                       controller: numberController,
-                      // overflow: TextOverflow.ellipsis,
                     ),
                   )
                 ],
@@ -483,27 +470,10 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                           color: Colors.white,
                         )),
                       ))
-
-                      // DialButton(
-                      //   color: Colors.green,
-                      //   icon: Icons.whatsapp,
-                      //   iconColor: Colors.white,
-                      //   textColor: themeData.dividerColor,
-                      // ),
                       ),
                   GestureDetector(
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => RecentScreen()));
-                        // print("=-=-=-");
-                        // if (numberController.text.isNotEmpty) {
-                        //   print("=-=-=-");
-                        //   var temp =
-                        //       countryCodeController.text.replaceAll(" ▾", "");
-                        //   var link =
-                        //       "https://api.whatsapp.com/send?phone=${numberController.text.toString().contains("+") ? "" : temp.replaceAll("+", "")}${numberController.text}&text=${message == null ? "" : message}";
-                        //   print(link);
-                        //   Share.share(link);
-                        // }
                       },
                       child: ClipOval(
                           child: Container(
@@ -517,13 +487,6 @@ class _KeyboardScreenState extends State<KeyboardScreen>
                           color: Colors.white,
                         )),
                       ))
-                      // DialButton(
-                      //
-                      //   color: Colors.green,
-                      //   icon: Icons.share,
-                      //   iconColor: Colors.white,
-                      //   textColor: themeData.dividerColor,
-                      // ),
                       )
                 ],
               ),

@@ -26,7 +26,6 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
     remindDays: 2,
     remindLaunches: 5,
     googlePlayIdentifier: "com.sunraylabs.socialtags",
-    // appStoreIdentifier: ‘1491556149’,
   );
 
   String? encodeQueryParameters(Map<String, String> params) {
@@ -45,7 +44,6 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
   getListOfNotification() async {
     var pendingNotificationRequests =
         await flutterLocalNotificationsPlugin.pendingNotificationRequests();
-    print(pendingNotificationRequests);
   }
 
   @override
@@ -65,18 +63,9 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
       ),
       body:Column(
         children: [
-          // Hero(
-          //   tag: 'appBar',
-          //   child: Material(
-          //     child: Text(
-          //       "Setting".tr,
-          //       style: TextStyle(
-          //           color: themeData.dividerColor, fontWeight: FontWeight.bold),
-          //     ),
-          //   ),
-          // ),
+          SizedBox(height: 8,),
           Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
             child: Container(
               decoration: BoxDecoration(
                   color: themeData.cardColor,
@@ -86,13 +75,12 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
                 children: [
                   GestureDetector(
                     onTap: (){
-                      // var url = Uri.parse("https://www.google.com");
-                      // launchUrl(url);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()));
                     },
                     child: Container(
                       color: Colors.transparent,
-                      child:   Padding(padding: const EdgeInsets.all(10),child: Row(
+                      child:   Padding(padding: const EdgeInsets.all(10),
+                        child: Row(
                         children: [
                           Padding(padding: const EdgeInsets.all(3),child: Icon(Icons.language_rounded,color: themeData.dividerColor),),
                           const SizedBox(width: 15,),
@@ -114,9 +102,8 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
               ),
             ),
           ),
-
           Padding(
-          padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
             child: Container(
               decoration: BoxDecoration(
                 color: themeData.cardColor,
@@ -158,7 +145,6 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
                   GestureDetector(
                     onTap: (){
                          var link = "https://www.google.com";
-                     print(link);
                      Share.share(link);
                     },
                     child: Container(
@@ -259,7 +245,7 @@ class _SettingScreenState extends State<SettingScreen> with AutomaticKeepAliveCl
             ),
           ),
           Padding(
-          padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
             child: Container(
               decoration: BoxDecoration(
                 color: themeData.cardColor,

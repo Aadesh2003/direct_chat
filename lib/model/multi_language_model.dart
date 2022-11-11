@@ -14,7 +14,7 @@ class MultiLanguageModel extends Translations {
           "Setting": "Setting",
           "Add Name": "Add name",
           "Add Message": "Add message",
-          "Enter Name": "Enter mame",
+          "Enter Name": "Enter name",
           "Enter Message": "Enter message",
           "No Recent": "You don't have any recent data",
           "Add Recent": "Add recent data now",
@@ -56,6 +56,14 @@ class MultiLanguageModel extends Translations {
           "mins ago": "mins ago",
           "hour ago": "hour ago",
           "day ago": "day ago",
+          "enter name textfield": "Enter the name of person",
+          "enter message textfield": "Message",
+          "Dual Whatsapp": "Dual Whatsapp",
+          "open whatsapp web": "Open whatsapp web",
+          "Clear": "Clear",
+          "Sure": "Are you sure?",
+          "Sure clear":
+              "If you clear history data then all history will be erase."
         },
         "es-ES": {
           "Ok": "OK",
@@ -110,6 +118,14 @@ class MultiLanguageModel extends Translations {
           "More App": "Más aplicaciones",
           "Privacy Policy": "Política de privacidad",
           "Terms of use": "Términos de Uso",
+          "enter name textfield": "Ingrese el nombre de la persona",
+          "enter message textfield": "Mensaje",
+          "Dual Whatsapp": "Whatsapp doble",
+          "open whatsapp web": "Abrir whatsapp web",
+          "Clear": "Claro",
+          "Sure": "¿Está seguro?",
+          "Sure clear":
+              "Si borra los datos del historial, se borrará todo el historial."
         },
         "hi_IN": {
           "Ok": "ठीक",
@@ -163,6 +179,14 @@ class MultiLanguageModel extends Translations {
           "More App": "और ज्यादा एप्लीकेशन",
           "Privacy Policy": "गोपनीयता नीति",
           "Terms of use": "उपयोग की शर्तें",
+          "enter name textfield": "व्यक्ति का नाम दर्ज करें",
+          "enter message textfield": "संदेश",
+          "Dual Whatsapp": "दोहरी व्हाट्सएप",
+          "open whatsapp web": "व्हाट्सएप वेब खोलें",
+          "Clear": "साफ़",
+          "Sure": "क्या आपको यकीन है?",
+          "Sure clear":
+              "यदि आप इतिहास डेटा साफ़ करते हैं तो सारा इतिहास मिटा दिया जाएगा।"
         },
         "ru-RU": {
           "Ok": "Ok",
@@ -217,6 +241,16 @@ class MultiLanguageModel extends Translations {
           "More App": "Больше приложений",
           "Privacy Policy": "Политика конфиденциальности",
           "Terms of use": "Условия эксплуатации",
+          "enter name textfield": "Введите имя человека",
+          "enter message textfield": "Сообщение",
+          "Dual Whatsapp": "Двойной WhatsApp",
+          "open whatsapp web": "Открыть веб-сайт WhatsApp",
+
+
+          "Clear": "Чистый",
+          "Sure": "Ты уверен?",
+          "Sure clear":
+              "Если вы очистите данные истории, вся история будет стерта."
         },
         "fr-FR": {
           "Ok": "D'accord",
@@ -269,6 +303,14 @@ class MultiLanguageModel extends Translations {
           "More App": "Plus d'application",
           "Privacy Policy": "Politique de confidentialité",
           "Terms of use": "Conditions d'utilisation",
+          "enter name textfield": "Entrez le nom de la personne",
+          "enter message textfield": "Message",
+          "Dual Whatsapp": "Double Whatsapp",
+          "open whatsapp web": "Ouvrez le site Web WhatsApp",
+
+          "Clear":        "Чистый",
+          "Sure":        "Ты уверен?",
+          "Sure clear":   "Если вы очистите данные истории, вся история будет стерта."
         },
         "de-DE": {
           "Ok": "OK",
@@ -320,6 +362,14 @@ class MultiLanguageModel extends Translations {
           "More App": "Mehr App",
           "Privacy Policy": "Datenschutz-Bestimmungen",
           "Terms of use": "Nutzungsbedingungen",
+          "enter name textfield": "Geben Sie den Namen der Person ein",
+          "enter message textfield": "Nachricht",
+          "Dual Whatsapp": "Duales WhatsApp",
+          "open whatsapp web": "WhatsApp-Web öffnen",
+
+          "Clear":       "Klar",
+          "Sure":         "Bist du dir sicher?",
+          "Sure clear":   "Wenn Sie Verlaufsdaten löschen, wird der gesamte Verlauf gelöscht."
         },
         "pt-PT": {
           "Ok": "OK",
@@ -373,6 +423,14 @@ class MultiLanguageModel extends Translations {
           "More App": "Mais aplicações",
           "Privacy Policy": "Política de Privacidade",
           "Terms of use": "Termos de uso",
+          "enter name textfield": "Digite o nome da pessoa",
+          "enter message textfield": "Mensagem",
+          "Dual Whatsapp": "Duplo Whatsapp",
+          "open whatsapp web": "Abrir whatsapp web",
+
+          "Clear":       "Claro",
+          "Sure":          "Tem certeza?",
+          "Sure clear":  "Se você limpar os dados do histórico, todo o histórico será apagado."
         },
         "it-IT": {
           "Ok": "Ok",
@@ -426,6 +484,14 @@ class MultiLanguageModel extends Translations {
           "More App": "Più applicazioni",
           "Privacy Policy": "Politica sulla riservatezza",
           "Terms of use": "Termini di utilizzo",
+          "enter name textfield": "Inserisci il nome della persona",
+          "enter message textfield": "Messaggio",
+          "Dual Whatsapp": "Doppio Whatsapp",
+          "open whatsapp web": "Apri whatsapp web",
+
+          "Clear":      "Chiaro",
+          "Sure":         "Sei sicuro?",
+          "Sure clear": "Se cancelli i dati della cronologia, tutta la cronologia verrà cancellata."
         },
       };
 }

@@ -34,7 +34,6 @@ class _RecentScreenState extends State<RecentScreen>
 
   getHistoryData() async {
     historyData = await DB.instance.getAll();
-    print(historyData);
     isLoading = false;
     setState(() {});
   }
@@ -80,6 +79,8 @@ class _RecentScreenState extends State<RecentScreen>
         context: context,
         builder: (context) {
           return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             title: Text('Delete!'.tr),
             content: Text("Sure Delete".tr),
             actions: [
@@ -98,17 +99,104 @@ class _RecentScreenState extends State<RecentScreen>
                         fontFamily: 'SFProDisplay')),
               ),
               MaterialButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  color: Colors.green,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Text('No'.tr,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'SFProDisplay'),),)
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'No'.tr,
+                  style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 16,
+                      fontFamily: 'SFProDisplay'),
+                ),
+              )
+            ],
+          );
+        });
+  }
+
+  buildClearDialogueIos() {
+    return showCupertinoDialog(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text('Sure'.tr),
+          content: Text("Sure clear".tr),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                if (historyData!.isNotEmpty) {
+                  for (var i = 0; i < historyData!.length; i++) {
+                    await DB.instance.deleteSingle(historyData![i].id);
+                  }
+                  historyData!.clear();
+                }
+                Navigator.pop(context);
+              },
+              child: Text(
+                'Yes'.tr,
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontFamily: 'SFProDisplay'),
+              ),
+            ),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('No'.tr,
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'SFProDisplay'))),
+          ],
+        );
+      },
+    );
+  }
+
+  buildClearDialogueAndroid() {
+    return showCupertinoDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            title: Text('Sure'.tr),
+            content: Text("Sure clear".tr),
+            actions: [
+              MaterialButton(
+                onPressed: () async {
+                  if (historyData!.isNotEmpty) {
+                    for (var i = 0; i < historyData!.length; i++) {
+                      await DB.instance.deleteSingle(historyData![i].id);
+                    }
+                    historyData!.clear();
+                  }
+                  Navigator.pop(context);
+                },
+                color: Colors.green,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                child: Text('Yes'.tr,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'SFProDisplay')),
+              ),
+              MaterialButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'No'.tr,
+                  style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 16,
+                      fontFamily: 'SFProDisplay'),
+                ),
+              )
             ],
           );
         });
@@ -117,13 +205,10 @@ class _RecentScreenState extends State<RecentScreen>
   deleteData(id) async {
     await DB.instance.deleteSingle(id);
     getHistoryData();
-    // DateTime.parse(formattedString)
   }
 
   Future<void> _launchUrl(number, isWhatsapp, countryCode, message) async {
     var temp = countryCode;
-    // IOS API
-    // "https://api.whatsapp.com/send?phone=9712151416&text=HELLO"
     var url;
     if (isWhatsapp) {
       url =
@@ -147,18 +232,10 @@ class _RecentScreenState extends State<RecentScreen>
         throw 'Could not launch $smsLaunchUri';
       }
     }
-
-    print("URL : $url");
-    //
-
-    // if (!await launchUrl(Uri.parse("https://api.whatsapp.com"))) {
-    //   throw 'Could not launch $url';+615
-    // }
   }
 
   @override
   Widget build(BuildContext context) {
-    print(historyData);
     return Scaffold(
         appBar: AppBar(
           foregroundColor: Colors.black,
@@ -168,16 +245,12 @@ class _RecentScreenState extends State<RecentScreen>
           actions: [
             TextButton(
                 onPressed: () async {
-                  if (historyData!.isNotEmpty) {
-                    for (var i = 0; i < historyData!.length; i++) {
-                      await DB.instance.deleteSingle(historyData![i].id);
-                      // deleteData();
-                    }
-                    historyData!.clear();
-                  }
+                  Platform.isAndroid
+                      ? buildClearDialogueAndroid()
+                      : buildClearDialogueIos();
                   setState(() {});
                 },
-                child: const Text("Clear"))
+                child: Text("Clear".tr))
           ],
           title: Text(
             "Recent".tr,
@@ -211,7 +284,6 @@ class _RecentScreenState extends State<RecentScreen>
                             TextButton(
                                 onPressed: () {
                                   Navigator.pop(context);
-                                  // pageController.jumpToPage(0);
                                 },
                                 child: Text(
                                   "Add Recent".tr,
@@ -228,11 +300,6 @@ class _RecentScreenState extends State<RecentScreen>
                             child: Slidable(
                                 endActionPane: ActionPane(
                                   extentRatio: 0.25,
-                                  // dismissible: Container(
-                                  //   height: 50,
-                                  //   width: 50,
-                                  //   color: Colors.blue,
-                                  // ),
                                   motion: const ScrollMotion(),
                                   children: [
                                     SlidableAction(
